@@ -393,13 +393,13 @@ static AsmFootPrint const fastStubHelperHelperX86_64 =
 };
 
 //=========================== ARM ===========================
-//===========================================================
 static AsmFootPrint const fastStubHelperARM =
 {
-  {4, 0xe5, 0x9f, 0xc0, 0x00},              // ldr  ip, [pc, #0]
-	{4, 0xea, 0x00, 0x00, 0x00},              // b	_helperhelper
-  GAP(4),                                   // lazy binding info
+    {4, 0xe5, 0x9f, 0xc0, 0x00},              // ldr  ip, [pc, #0]
+    {4, 0xea, 0x00, 0x00, 0x00},              // b    _helperhelper
+    GAP(4),                                   // lazy binding info
 };
+//===========================================================
 
 static AsmFootPrint const fastStubHelperHelperARM =
 {
