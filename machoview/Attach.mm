@@ -30,7 +30,7 @@ find_main_binary(pid_t pid, mach_vm_address_t *main_address) {
         NSLog(@"[ERROR] Can't execute task_for_pid! Do you have the right permissions/entitlements?\n");
         return KERN_FAILURE;
     }
-    
+
     vm_address_t iter = 0;
     while (1) {
         struct mach_header mh = {0};
@@ -40,10 +40,10 @@ find_main_binary(pid_t pid, mach_vm_address_t *main_address) {
         mach_vm_size_t bytes_read = 0;
         struct vm_region_submap_info_64 info;
         mach_msg_type_number_t count = VM_REGION_SUBMAP_INFO_COUNT_64;
-        if (vm_region_recurse_64(targetTask, &addr, &lsize, &depth, (vm_region_info_t)&info, &count)) {
+        if (vm_region_recurse_64(targetTask, &addr, &lsize, &depth, (vm_region_info_t) &info, &count)) {
             break;
         }
-        kr = mach_vm_read_overwrite(targetTask, (mach_vm_address_t)addr, (mach_vm_size_t)sizeof(struct mach_header), (mach_vm_address_t)&mh, &bytes_read);
+        kr = mach_vm_read_overwrite(targetTask, (mach_vm_address_t) addr, (mach_vm_size_t) sizeof(struct mach_header), (mach_vm_address_t) &mh, &bytes_read);
         if (kr == KERN_SUCCESS && bytes_read == sizeof(struct mach_header)) {
             /* only one image with MH_EXECUTE filetype */
             if ((mh.magic == MH_MAGIC || mh.magic == MH_MAGIC_64) && mh.filetype == MH_EXECUTE) {
@@ -73,39 +73,39 @@ get_image_size(mach_vm_address_t address, pid_t pid, uint64_t *vmaddr_slide) {
     // NOTE: this is not exactly correct since the 64bit version has an extra 4 bytes
     // but this will work for this purpose so no need for more complexity!
     struct mach_header header = {0};
-    if (readmem((mach_vm_offset_t *)&header, address, sizeof(struct mach_header), pid, &region_info)) {
+    if (readmem((mach_vm_offset_t *) &header, address, sizeof(struct mach_header), pid, &region_info)) {
         NSLog(@"Can't read header!");
         return -1;
     }
-    
+
     if (header.magic != MH_MAGIC && header.magic != MH_MAGIC_64) {
         printf("[ERROR] Target is not a mach-o binary!\n");
         return -1;
     }
-    
+
     int64_t imagefilesize = -1;
     /* read the load commands */
-    uint8_t *loadcmds = (uint8_t *)malloc(header.sizeofcmds);
+    uint8_t *loadcmds = (uint8_t *) malloc(header.sizeofcmds);
     uint16_t mach_header_size = sizeof(struct mach_header);
     if (header.magic == MH_MAGIC_64) {
         mach_header_size = sizeof(struct mach_header_64);
     }
-    if (readmem((mach_vm_offset_t *)loadcmds, address + mach_header_size, header.sizeofcmds, pid, &region_info)) {
+    if (readmem((mach_vm_offset_t *) loadcmds, address + mach_header_size, header.sizeofcmds, pid, &region_info)) {
         NSLog(@"Can't read load commands");
         free(loadcmds);
         return -1;
     }
-    
+
     /* process and retrieve address and size of linkedit */
     uint8_t *loadCmdAddress = 0;
-    loadCmdAddress = (uint8_t *)loadcmds;
+    loadCmdAddress = (uint8_t *) loadcmds;
     struct load_command *loadCommand = NULL;
     struct segment_command *segCmd = NULL;
     struct segment_command_64 *segCmd64 = NULL;
     for (uint32_t i = 0; i < header.ncmds; i++) {
-        loadCommand = (struct load_command *)loadCmdAddress;
+        loadCommand = (struct load_command *) loadCmdAddress;
         if (loadCommand->cmd == LC_SEGMENT) {
-            segCmd = (struct segment_command *)loadCmdAddress;
+            segCmd = (struct segment_command *) loadCmdAddress;
             if (strncmp(segCmd->segname, "__PAGEZERO", 16) != 0) {
                 if (strncmp(segCmd->segname, "__TEXT", 16) == 0) {
                     *vmaddr_slide = address - segCmd->vmaddr;
@@ -113,7 +113,7 @@ get_image_size(mach_vm_address_t address, pid_t pid, uint64_t *vmaddr_slide) {
                 imagefilesize += segCmd->filesize;
             }
         } else if (loadCommand->cmd == LC_SEGMENT_64) {
-            segCmd64 = (struct segment_command_64 *)loadCmdAddress;
+            segCmd64 = (struct segment_command_64 *) loadCmdAddress;
             if (strncmp(segCmd64->segname, "__PAGEZERO", 16) != 0) {
                 if (strncmp(segCmd64->segname, "__TEXT", 16) == 0) {
                     *vmaddr_slide = address - segCmd64->vmaddr;
@@ -139,53 +139,53 @@ dump_binary(mach_vm_address_t address, pid_t pid, uint8_t *buffer, uint64_t aslr
     // NOTE: this is not exactly correct since the 64bit version has an extra 4 bytes
     // but this will work for this purpose so no need for more complexity!
     struct mach_header header = {0};
-    if (readmem((mach_vm_offset_t *)&header, address, sizeof(struct mach_header), pid, &region_info)) {
+    if (readmem((mach_vm_offset_t *) &header, address, sizeof(struct mach_header), pid, &region_info)) {
         NSLog(@"Can't read header!");
         return KERN_FAILURE;
     }
-    
+
     if (header.magic != MH_MAGIC && header.magic != MH_MAGIC_64) {
         printf("[ERROR] Target is not a mach-o binary!\n");
         exit(1);
     }
-    
+
     // read the header info to find the LINKEDIT
-    uint8_t *loadcmds = (uint8_t *)malloc(header.sizeofcmds);
-    
+    uint8_t *loadcmds = (uint8_t *) malloc(header.sizeofcmds);
+
     uint16_t mach_header_size = sizeof(struct mach_header);
     if (header.magic == MH_MAGIC_64) {
         mach_header_size = sizeof(struct mach_header_64);
     }
     // retrieve the load commands
-    if (readmem((mach_vm_offset_t *)loadcmds, address + mach_header_size, header.sizeofcmds, pid, &region_info)) {
+    if (readmem((mach_vm_offset_t *) loadcmds, address + mach_header_size, header.sizeofcmds, pid, &region_info)) {
         NSLog(@"Can't read load commands");
         return KERN_FAILURE;
     }
-    
+
     // process and retrieve address and size of linkedit
     uint8_t *loadCmdAddress = 0;
-    loadCmdAddress = (uint8_t *)loadcmds;
+    loadCmdAddress = (uint8_t *) loadcmds;
     struct load_command *loadCommand = NULL;
     struct segment_command *segCmd = NULL;
     struct segment_command_64 *segCmd64 = NULL;
     for (uint32_t i = 0; i < header.ncmds; i++) {
-        loadCommand = (struct load_command *)loadCmdAddress;
+        loadCommand = (struct load_command *) loadCmdAddress;
         if (loadCommand->cmd == LC_SEGMENT) {
-            segCmd = (struct segment_command *)loadCmdAddress;
+            segCmd = (struct segment_command *) loadCmdAddress;
             if (strncmp(segCmd->segname, "__PAGEZERO", 16) != 0) {
 #if DEBUG
                 printf("[DEBUG] Dumping %s at %llx with size %x (buffer:%x)\n", segCmd->segname, segCmd->vmaddr + aslr_slide, segCmd->filesize, (uint32_t)*buffer);
 #endif
-                readmem((mach_vm_offset_t *)buffer, segCmd->vmaddr + aslr_slide, segCmd->filesize, pid, &region_info);
+                readmem((mach_vm_offset_t *) buffer, segCmd->vmaddr + aslr_slide, segCmd->filesize, pid, &region_info);
             }
             buffer += segCmd->filesize;
         } else if (loadCommand->cmd == LC_SEGMENT_64) {
-            segCmd64 = (struct segment_command_64 *)loadCmdAddress;
+            segCmd64 = (struct segment_command_64 *) loadCmdAddress;
             if (strncmp(segCmd64->segname, "__PAGEZERO", 16) != 0) {
 #if DEBUG
                 printf("[DEBUG] Dumping %s at %llx with size %llx (buffer:%x)\n", segCmd64->segname, segCmd64->vmaddr + aslr_slide, segCmd64->filesize, (uint32_t)*buffer);
 #endif
-                readmem((mach_vm_offset_t *)buffer, segCmd64->vmaddr + aslr_slide, segCmd64->filesize, pid, &region_info);
+                readmem((mach_vm_offset_t *) buffer, segCmd64->vmaddr + aslr_slide, segCmd64->filesize, pid, &region_info);
             }
             buffer += segCmd64->filesize;
         }
@@ -202,7 +202,7 @@ static kern_return_t
 readmem(mach_vm_offset_t *buffer, mach_vm_address_t address, mach_vm_size_t size, pid_t pid, vm_region_basic_info_data_64_t *info) {
     // get task for pid
     vm_map_t port;
-    
+
     kern_return_t kr;
     //#if DEBUG
     //    printf("[DEBUG] Readmem of address %llx to buffer %llx with size %llx\n", address, buffer, size);
@@ -211,20 +211,20 @@ readmem(mach_vm_offset_t *buffer, mach_vm_address_t address, mach_vm_size_t size
         fprintf(stderr, "[ERROR] Can't execute task_for_pid! Do you have the right permissions/entitlements?\n");
         return KERN_FAILURE;
     }
-    
+
     mach_msg_type_number_t info_cnt = sizeof(vm_region_basic_info_data_64_t);
     mach_port_t object_name;
     mach_vm_size_t size_info;
     mach_vm_address_t address_info = address;
-    kr = mach_vm_region(port, &address_info, &size_info, VM_REGION_BASIC_INFO_64, (vm_region_info_t)info, &info_cnt, &object_name);
+    kr = mach_vm_region(port, &address_info, &size_info, VM_REGION_BASIC_INFO_64, (vm_region_info_t) info, &info_cnt, &object_name);
     if (kr) {
-        fprintf(stderr, "[ERROR] mach_vm_region failed with error %d\n", (int)kr);
+        fprintf(stderr, "[ERROR] mach_vm_region failed with error %d\n", (int) kr);
         return KERN_FAILURE;
     }
-    
+
     /* read memory - vm_read_overwrite because we supply the buffer */
     mach_vm_size_t nread;
-    kr = mach_vm_read_overwrite(port, address, size, (mach_vm_address_t)buffer, &nread);
+    kr = mach_vm_read_overwrite(port, address, size, (mach_vm_address_t) buffer, &nread);
     if (kr) {
         fprintf(stderr, "[ERROR] vm_read failed! %d\n", kr);
         return KERN_FAILURE;

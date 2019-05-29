@@ -37,8 +37,11 @@
 @property (nonatomic, readonly) MVDataController *dataController;
 
 - (IBAction)updateSearchFilter:(id)sender;
+
 - (IBAction)updateAddressingMode:(id)sender;
+
 - (IBAction)stopProcessing:(id)sender;
+
 - (BOOL)isRVA;
 
 + (NSString *)temporaryDirectory;

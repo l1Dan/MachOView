@@ -18,9 +18,11 @@
 
 @interface MachOLayout (DyldInfo)
 
-enum BindNodeType { NodeTypeBind,
+enum BindNodeType {
+    NodeTypeBind,
     NodeTypeWeakBind,
-    NodeTypeLazyBind };
+    NodeTypeLazyBind
+};
 
 - (MVNode *)createRebaseNode:(MVNode *)parent
                      caption:(NSString *)caption

@@ -7,7 +7,7 @@
  */
 
 #define OFFSET_COLUMN 0
-#define DATA_COLUMN 1	// use this with details
+#define DATA_COLUMN 1    // use this with details
 #define DESCRIPTION_COLUMN 2 // use this with details
 #define VALUE_COLUMN 3
 
@@ -36,7 +36,9 @@ struct MVNodeSaver;
 
 @protocol MVSerializing <NSObject>
 - (void)loadFromFile:(FILE *)pFile;
+
 - (void)saveToFile:(FILE *)pFile;
+
 - (void)clear;
 @end
 
@@ -92,16 +94,23 @@ struct MVNodeSaver;
 @property (nonatomic) FILE *swapFile;
 
 - (NSUInteger)rowCountToDisplay;
+
 - (MVRow *)getRowToDisplay:(NSUInteger)rowIndex;
 
 - (void)popRow;
+
 - (void)appendRow:(id)col0 col1:(id)col1 col2:(id)col2 col3:(id)col3;
+
 - (void)insertRowWithOffset:(uint32_t)offset col0:(id)col0 col1:(id)col1 col2:(id)col2 col3:(id)col3;
+
 - (void)updateCellContentTo:(id)object atRow:(NSUInteger)rowIndex andCol:(NSUInteger)colIndex;
 
 - (NSUInteger)rowCount;
+
 - (void)setAttributes:(NSString *)firstArg, ... NS_REQUIRES_NIL_TERMINATION;
+
 - (void)setAttributesForRowIndex:(NSUInteger)index firstArg:(NSString *)firstArg, ... NS_REQUIRES_NIL_TERMINATION;
+
 - (void)setAttributesFromRowIndex:(NSUInteger)index firstArg:(NSString *)firstArg, ... NS_REQUIRES_NIL_TERMINATION;
 
 @end
@@ -125,15 +134,23 @@ struct MVNodeSaver;
 @property (nonatomic) uint32_t detailsOffset;
 
 - (NSUInteger)numberOfChildren;
+
 - (MVNode *)childAtIndex:(NSUInteger)n;
+
 - (MVNode *)insertChild:(NSString *)_caption location:(uint32_t)location length:(uint32_t)length;
+
 - (MVNode *)insertChildWithDetails:(NSString *)_caption location:(uint32_t)location length:(uint32_t)length saver:(MVNodeSaver &)saver;
+
 - (MVNode *)findNodeByUserInfo:(NSDictionary *)uinfo;
+
 - (void)openDetails;  // open swap file for reading details on demand
 - (void)closeDetails; // close swap file
 - (void)sortDetails;
+
 - (void)filterDetails:(NSString *)filter;
+
 - (void)loadFromFile:(FILE *)pFile;
+
 - (void)saveToFile:(FILE *)pFile;
 
 @end
@@ -158,11 +175,15 @@ struct MVNodeSaver;
 @property (nonatomic, readonly) NSLock *treeLock;
 
 - (NSString *)getMachine:(cpu_type_t)cputype;
+
 - (NSString *)getARMCpu:(cpu_subtype_t)cpusubtype;
 
 - (void)createLayouts:(MVNode *)parent location:(uint32_t)location length:(uint32_t)length;
+
 - (void)updateTreeView:(MVNode *)node;
+
 - (void)updateTableView;
+
 - (void)updateStatus:(NSString *)status;
 
 @end
@@ -178,9 +199,13 @@ struct MVNodeSaver;
 @property (nonatomic, readonly) NSString *swapPath;
 
 + (MVArchiver *)archiverWithPath:(NSString *)path;
+
 - (void)addObjectToSave:(id)object;
+
 - (void)suspend;
+
 - (void)resume;
+
 - (void)halt;
 
 @end
@@ -188,13 +213,17 @@ struct MVNodeSaver;
 //----------------------------------------------------------------------------
 struct MVNodeSaver {
     MVNodeSaver();
+
     ~MVNodeSaver();
-    
-    void setNode(MVNode *node) { m_node = node; }
-    
+
+    void setNode(MVNode *node) {
+        m_node = node;
+    }
+
 private:
     MVNodeSaver(MVNodeSaver const &);
+
     MVNodeSaver &operator=(MVNodeSaver const &);
-    
+
     MVNode *__weak m_node;
 };

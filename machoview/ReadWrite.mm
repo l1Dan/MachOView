@@ -102,7 +102,7 @@
 - (NSString *)getHexStr:(NSRange &)range {
     NSMutableString *lastReadHex = [NSMutableString stringWithCapacity:2 * range.length];
     for (NSUInteger i = 0; i < range.length; ++i) {
-        int value = *((uint8_t *)[fileData bytes] + range.location + i);
+        int value = *((uint8_t *) [fileData bytes] + range.location + i);
         [lastReadHex appendFormat:@"%.2X", value];
     }
     return lastReadHex;
@@ -113,7 +113,7 @@
     NSUInteger len = [orig length];
     NSMutableString *str = [[NSMutableString alloc] init];
     SEL sel = @selector(characterAtIndex:);
-    unichar (*charAtIdx)(id, SEL, NSUInteger) = (typeof(charAtIdx))[orig methodForSelector:sel];
+    unichar (*charAtIdx)(id, SEL, NSUInteger) = (typeof(charAtIdx)) [orig methodForSelector:sel];
     for (NSUInteger i = 0; i < len; i++) {
         unichar c = charAtIdx(orig, sel, i);
         switch (c) {
@@ -143,7 +143,7 @@
 //-----------------------------------------------------------------------------
 - (NSString *)read_string:(NSRange &)range lastReadHex:(NSString **)lastReadHex {
     range.location = NSMaxRange(range);
-    NSString *str = NSSTRING((uint8_t *)[fileData bytes] + range.location);
+    NSString *str = NSSTRING((uint8_t *) [fileData bytes] + range.location);
     range.length = [str length] + 1;
     if (lastReadHex) *lastReadHex = [self getHexStr:range];
     return [self replaceEscapeCharsInString:str];
@@ -152,7 +152,7 @@
 //-----------------------------------------------------------------------------
 - (NSString *)read_string:(NSRange &)range fixlen:(NSUInteger)len lastReadHex:(NSString **)lastReadHex {
     range = NSMakeRange(NSMaxRange(range), len);
-    uint8_t *buffer = (uint8_t *)malloc(len + 1);
+    uint8_t *buffer = (uint8_t *) malloc(len + 1);
     buffer[len] = '\0';
     [fileData getBytes:buffer range:range];
     if (lastReadHex) *lastReadHex = [self getHexStr:range];
@@ -164,7 +164,7 @@
 //-----------------------------------------------------------------------------
 - (NSData *)read_bytes:(NSRange &)range length:(NSUInteger)length lastReadHex:(NSString **)lastReadHex {
     range = NSMakeRange(NSMaxRange(range), length);
-    uint8_t *buffer = (uint8_t *)malloc(length);
+    uint8_t *buffer = (uint8_t *) malloc(length);
     [fileData getBytes:buffer range:range];
     if (lastReadHex) *lastReadHex = [self getHexStr:range];
     NSData *ret = [NSData dataWithBytes:buffer length:length];
@@ -175,23 +175,23 @@
 //-----------------------------------------------------------------------------
 - (int64_t)read_sleb128:(NSRange &)range lastReadHex:(NSString **)lastReadHex {
     range.location = NSMaxRange(range);
-    uint8_t *p = (uint8_t *)[fileData bytes] + range.location, *start = p;
-    
+    uint8_t *p = (uint8_t *) [fileData bytes] + range.location, *start = p;
+
     int64_t result = 0;
     int bit = 0;
     uint8_t byte;
-    
+
     do {
         byte = *p++;
         result |= ((byte & 0x7f) << bit);
         bit += 7;
     } while (byte & 0x80);
-    
+
     // sign extend negative numbers
     if ((byte & 0x40) != 0) {
         result |= (-1LL) << bit;
     }
-    
+
     range.length = (p - start);
     if (lastReadHex) *lastReadHex = [self getHexStr:range];
     return result;
@@ -200,14 +200,14 @@
 // ----------------------------------------------------------------------------
 - (uint64_t)read_uleb128:(NSRange &)range lastReadHex:(NSString **)lastReadHex {
     range.location = NSMaxRange(range);
-    uint8_t *p = (uint8_t *)[fileData bytes] + range.location, *start = p;
-    
+    uint8_t *p = (uint8_t *) [fileData bytes] + range.location, *start = p;
+
     uint64_t result = 0;
     int bit = 0;
-    
+
     do {
         uint64_t slice = *p & 0x7f;
-        
+
         if (bit >= 64 || slice << bit >> bit != slice)
             [NSException raise:@"uleb128 error" format:@"uleb128 too big"];
         else {
@@ -215,7 +215,7 @@
             bit += 7;
         }
     } while (*p++ & 0x80);
-    
+
     range.length = (p - start);
     if (lastReadHex) *lastReadHex = [self getHexStr:range];
     return result;
@@ -331,24 +331,31 @@
 - (uint8_t)read_uint8:(NSRange &)range {
     return [self read_uint8:range lastReadHex:NULL];
 }
+
 - (uint16_t)read_uint16:(NSRange &)range {
     return [self read_uint16:range lastReadHex:NULL];
 }
+
 - (uint32_t)read_uint32:(NSRange &)range {
     return [self read_uint32:range lastReadHex:NULL];
 }
+
 - (uint64_t)read_uint64:(NSRange &)range {
     return [self read_uint64:range lastReadHex:NULL];
 }
+
 - (int8_t)read_int8:(NSRange &)range {
     return [self read_int8:range lastReadHex:NULL];
 }
+
 - (int16_t)read_int16:(NSRange &)range {
     return [self read_int16:range lastReadHex:NULL];
 }
+
 - (int32_t)read_int32:(NSRange &)range {
     return [self read_int32:range lastReadHex:NULL];
 }
+
 - (int64_t)read_int64:(NSRange &)range {
     return [self read_int64:range lastReadHex:NULL];
 }
@@ -357,15 +364,19 @@
 - (NSString *)read_string:(NSRange &)range {
     return [self read_string:range lastReadHex:NULL];
 }
+
 - (NSString *)read_string:(NSRange &)range fixlen:(NSUInteger)len {
     return [self read_string:range fixlen:len lastReadHex:NULL];
 }
+
 - (NSData *)read_bytes:(NSRange &)range length:(NSUInteger)length {
     return [self read_bytes:range length:length lastReadHex:NULL];
 }
+
 - (int64_t)read_sleb128:(NSRange &)range {
     return [self read_sleb128:range lastReadHex:NULL];
 }
+
 - (uint64_t)read_uleb128:(NSRange &)range {
     return [self read_uleb128:range lastReadHex:NULL];
 }

@@ -7,6 +7,7 @@
  */
 
 #import "MachOLayout.h"
+
 @interface MachOLayout (LinkEdit)
 
 - (MVNode *)createRelocNode:(MVNode *)parent

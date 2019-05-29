@@ -28,12 +28,19 @@ if (!obj) [NSException raise:@"null exception" format:@ #obj " is null"];
 @property (nonatomic, readonly) MVArchiver *archiver;
 
 - (id)initWithDataController:(MVDataController *)dc rootNode:(MVNode *)node;
+
 - (void const *)imageAt:(uint32_t)location;
+
 - (void)printException:(NSException *)exception caption:(NSString *)caption;
+
 - (BOOL)is64bit;
+
 - (void)doMainTasks;
+
 - (void)doBackgroundTasks;
+
 - (NSString *)convertToRVA:(NSString *)offsetStr;
+
 - (MVNode *)findNodeByUserInfo:(NSDictionary *)userInfo;
 
 - (MVNode *)createDataNode:(MVNode *)parent

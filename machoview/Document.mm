@@ -53,9 +53,9 @@
 //----------------------------------------------------------------------------
 - (void)drawGridInClipRect:(NSRect)clipRect {
     MVDocument *document = [[[self window] windowController] document];
-    
+
     NSRange rowRange = [self rowsInRect:clipRect];
-    
+
     // Adjust column range, always go from zero, so we can gather columns even to
     // the left of what we are supposed to draw.
     [[NSColor grayColor] set];
@@ -66,14 +66,14 @@
         if (row == nil) {
             continue;
         }
-        
+
         if ([[row.attributes objectForKey:MVUnderlineAttributeName] isEqualToString:@"YES"]) {
             NSRect rowRect = [self rectOfRow:rowIndex];
-            
+
             [NSBezierPath strokeLineFromPoint:NSMakePoint(rowRect.origin.x,
-                                                          -0.5 + rowRect.origin.y + rowRect.size.height)
+                            -0.5 + rowRect.origin.y + rowRect.size.height)
                                       toPoint:NSMakePoint(rowRect.origin.x + rowRect.size.width,
-                                                          -0.5 + rowRect.origin.y + rowRect.size.height)];
+                                              -0.5 + rowRect.origin.y + rowRect.size.height)];
         }
     }
     //[super drawGridInClipRect:clipRect];
@@ -82,9 +82,9 @@
 //----------------------------------------------------------------------------
 - (void)highlightSelectionInClipRect:(NSRect)clipRect {
     MVDocument *document = [[[self window] windowController] document];
-    
+
     NSRange rowRange = [self rowsInRect:clipRect];
-    
+
     for (NSUInteger rowIndex = rowRange.location;
          rowIndex < NSMaxRange(rowRange);
          rowIndex++) {
@@ -92,13 +92,13 @@
         if (row == nil) {
             continue;
         }
-        
+
         NSColor *color = [row.attributes objectForKey:MVCellColorAttributeName];
         if (color != nil) {
             NSColor *bgcolor = [[NSColor controlAlternatingRowBackgroundColors] objectAtIndex:rowIndex % 2];
-            
+
             [[color blendedColorWithFraction:0.85f ofColor:bgcolor] setFill];
-            
+
             NSRect rowRect = [self rectOfRow:rowIndex];
             NSRectFill(rowRect);
         }
@@ -111,10 +111,10 @@
     // I have no idea why NSTableView (or one of its parents) does not implement
     // 'cancel editing' functionality by default....
     // so, let's do it for ourselves
-    
+
     if ([self currentEditor] != nil) {
         [self abortEditing];
-        
+
         // We lose focus so re-establish
         [[self window] makeFirstResponder:self];
     }
@@ -198,10 +198,10 @@
             [zeroes appendString:@"0"];
         }
         (*anObject) = [NSString stringWithFormat:@"%@%@",
-                       alignLeft ? string : zeroes,
-                       alignLeft ? zeroes : string];
+                                                 alignLeft ? string : zeroes,
+                                                 alignLeft ? zeroes : string];
     }
-    
+
     return YES;
 }
 
@@ -221,43 +221,43 @@
        originalSelectedRange:(NSRange)origSelRange
             errorDescription:(NSString **)error {
     NSScanner *scanner = [NSScanner scannerWithString:*partialStringPtr];
-    
+
     if (compound)
         // option 1: formatted hex value (11 22 33 44 55 66 77 88 )
     {
         [scanner setCharactersToBeSkipped:[NSCharacterSet whitespaceCharacterSet]];
-        
+
         NSUInteger numBytes = length;
         while ([scanner isAtEnd] == NO) {
             unsigned value;
-            
+
             // value needs to be hex and number of bytes is determined
             if ([scanner scanHexInt:&value] == NO || value > 0xff || numBytes == 0) {
                 return NO;
             }
-            
+
             --numBytes;
         }
-        
+
     } else
         // option 2: plain hex value
     {
         [scanner setCharactersToBeSkipped:nil];
-        
+
         NSCharacterSet *characterSet = [NSCharacterSet characterSetWithCharactersInString:@"0123456789ABCDEFabcdef"];
         while ([scanner isAtEnd] == NO) {
             // must be a valid hex value
             if ([scanner scanCharactersFromSet:characterSet intoString:NULL] == NO) {
                 return NO;
             }
-            
+
             // apply upper limit on length
             if ([*partialStringPtr length] > length) {
                 return NO;
             }
         }
     }
-    
+
     return YES;
 }
 
@@ -279,12 +279,12 @@ enum ViewType {
 + (NSString *)temporaryDirectory {
     NSProcessInfo *procInfo = [NSProcessInfo processInfo];
     NSBundle *mainBundle = [NSBundle mainBundle];
-    
+
     NSString *swapDir = [NSString stringWithFormat:@"%@%@_%@.XXXXXXXXXXX",
-                         NSTemporaryDirectory(),
-                         [procInfo processName],
-                         [mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"]];
-    
+                                                   NSTemporaryDirectory(),
+                                                   [procInfo processName],
+                                                   [mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"]];
+
     return swapDir;
 }
 
@@ -294,10 +294,10 @@ enum ViewType {
     if (self) {
         dataController = [[MVDataController alloc] init];
         threadCount = 0;
-        
+
         NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
         typeof(self) __weak weakSelf = self;
-        
+
         /*
          [nc addObserver:weakSelf
          selector:@selector(handleDataTreeWillChange:)
@@ -313,12 +313,12 @@ enum ViewType {
                selector:@selector(handleDataTreeChanged:)
                    name:MVDataTreeChangedNotification
                  object:nil];
-        
+
         [nc addObserver:weakSelf
                selector:@selector(handleDataTableChanged:)
                    name:MVDataTableChangedNotification
                  object:nil];
-        
+
         [nc addObserver:weakSelf
                selector:@selector(handleThreadStateChanged:)
                    name:MVThreadStateChangedNotification
@@ -361,14 +361,14 @@ enum ViewType {
             if (userInfo) {
                 //refresh the modified node only
                 MVNode *node = [userInfo objectForKey:MVNodeUserInfoKey];
-                
+
                 // check if the window still exists which contains the leftView to update
                 if ([[self windowControllers] count] == 0) {
                     return;
                 }
-                
+
                 [leftView reloadItem:node.parent];
-                
+
                 if ([leftView isItemExpanded:node.parent]) {
                     [leftView reloadItem:node];
                 }
@@ -412,17 +412,17 @@ enum ViewType {
 //----------------------------------------------------------------------------
 - (void)windowControllerDidLoadNib:(NSWindowController *)aController {
     [super windowControllerDidLoadNib:aController];
-    
+
     // fill in initial data sources
     [statusText setStringValue:@"Loading..."];
     for (MVLayout *layout in dataController.layouts) {
         [layout doMainTasks];
     }
-    
+
     // refresh initial view
     [leftView reloadData];
     [leftView expandItem:dataController.rootNode];
-    
+
     // finish processing in background
     [statusText setStringValue:@"Processing in background..."];
     for (MVLayout *layout in dataController.layouts) {
@@ -455,28 +455,28 @@ enum ViewType {
         free(tmpFilePath);
         return NO;
     }
-    
+
     NSURL *tmpURL = [NSURL fileURLWithPath:[NSString stringWithUTF8String:tmpFilePath]];
     free(tmpFilePath);
-    
+
     [[NSFileManager defaultManager] copyItemAtURL:absoluteURL
                                             toURL:tmpURL
                                             error:outError];
     if (*outError) return NO;
-    
+
     // open the copied binary for patching
     dataController.realData = [NSMutableData dataWithContentsOfURL:tmpURL
                                                            options:NSDataReadingMappedAlways
                                                              error:outError];
     if (*outError) return NO;
-    
+
     // open the original binary for viewing/editing
     dataController.fileName = [absoluteURL path];
     dataController.fileData = [NSMutableData dataWithContentsOfURL:absoluteURL
                                                            options:NSDataReadingMappedIfSafe
                                                              error:outError];
     if (*outError) return NO;
-    
+
     @try {
         [dataController createLayouts:dataController.rootNode location:0 length:[dataController.fileData length]];
     }
@@ -484,12 +484,12 @@ enum ViewType {
         *outError = [NSError errorWithDomain:NSCocoaErrorDomain
                                         code:NSFileReadUnknownError
                                     userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
-                                              [[self fileURL] path], NSFilePathErrorKey,
-                                              [exception reason], NSLocalizedDescriptionKey,
-                                              nil]];
+                                            [[self fileURL] path], NSFilePathErrorKey,
+                                            [exception reason], NSLocalizedDescriptionKey,
+                                                    nil]];
         return NO;
     }
-    
+
     return YES;
 }
 
@@ -529,7 +529,7 @@ enum ViewType {
     // stopping threads takes time so disable the stop button to give a feedback
     // and preserve from further clicks
     [stopButton setEnabled:NO];
-    
+
     // stop every background task
     for (MVLayout *layout in dataController.layouts) {
         [layout.backgroundThread cancel];
@@ -539,17 +539,17 @@ enum ViewType {
 //----------------------------------------------------------------------------
 - (IBAction)rightViewDoubleAction:(id)sender {
     NSParameterAssert(sender == rightView);
-    
+
     NSInteger colIndex = [sender clickedColumn];
     NSInteger rowIndex = [sender clickedRow];
-    
+
     if ([[[rightView tableColumns] objectAtIndex:colIndex] isEditable]) {
         if (dataController.selectedNode.details != nil) {
             MVRow *row = [dataController.selectedNode.details getRowToDisplay:rowIndex];
             if (row == nil) {
                 return;
             }
-            
+
             NSString *cellContent = [row coloumnAtIndex:colIndex];
             if ([cellContent length] == 0) {
                 return;
@@ -558,11 +558,11 @@ enum ViewType {
         [rightView editColumn:colIndex row:rowIndex withEvent:nil select:YES];
         return;
     }
-    
+
     // jump to symbol definition
     if (colIndex == VALUE_COLUMN) {
         // determine symbol type (local, public, external)
-        
+
         //NSIndexSet * indexes;
         //[leftView selectRowIndexes:indexes byExtendingSelection:NO];
     }
@@ -575,7 +575,7 @@ enum ViewType {
     NSTableColumn *column1 = [[rightView tableColumns] objectAtIndex:1];
     NSTableColumn *column2 = [[rightView tableColumns] objectAtIndex:2];
     NSTableColumn *column3 = [[rightView tableColumns] objectAtIndex:3];
-    
+
     switch (viewType) {
         case e_details:
         case e_details64:
@@ -583,26 +583,26 @@ enum ViewType {
             [[column1 headerCell] setStringValue:@"Data"];
             [[column2 headerCell] setStringValue:@"Description"];
             [[column3 headerCell] setStringValue:@"Value"];
-            
+
             [column0 setEditable:NO];
             [column1 setEditable:YES];
             [column2 setEditable:NO];
             [column3 setEditable:NO];
             break;
-            
+
         case e_hex:
         case e_hex64:
             [[column0 headerCell] setStringValue:[self isRVA] == NO ? @"pFile" : @"Address"];
             [[column1 headerCell] setStringValue:@"Data LO"];
             [[column2 headerCell] setStringValue:@"Data HI"];
             [[column3 headerCell] setStringValue:@"Value"];
-            
+
             [column0 setEditable:NO];
             [column1 setEditable:YES];
             [column2 setEditable:YES];
             [column3 setEditable:NO];
             break;
-            
+
         default:; // do not change current view
     }
 }
@@ -610,11 +610,11 @@ enum ViewType {
 //----------------------------------------------------------------------------
 - (void)canCloseDocumentWithDelegate:(id)delegate shouldCloseSelector:(SEL)shouldCloseSelector contextInfo:(void *)contextInfo {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    
+
     for (MVLayout *layout in dataController.layouts) {
         [layout.backgroundThread cancel];
     }
-    
+
     [super canCloseDocumentWithDelegate:delegate shouldCloseSelector:shouldCloseSelector contextInfo:contextInfo];
 }
 
@@ -625,36 +625,36 @@ enum ViewType {
     if ([notification object] == leftView) {
         NSInteger rowIndex = [leftView selectedRow];
         MVNode *nodeToSelect = [leftView itemAtRow:rowIndex];
-        
+
         if (dataController.selectedNode != nodeToSelect) {
             // close old details
             if (dataController.selectedNode.detailsOffset != 0) {
                 // release swap file
                 [dataController.selectedNode closeDetails];
-                
+
                 // kick out from memory
                 dataController.selectedNode.details = nil;
             }
-            
+
             // open new details
             [nodeToSelect openDetails];
-            
+
             // reset filter on node change
             [nodeToSelect filterDetails:nil];
-            
+
             // swap nodes
             dataController.selectedNode = nodeToSelect;
         }
-        
+
         MVLayout *layout = [nodeToSelect.userInfo objectForKey:MVLayoutUserInfoKey];
         BOOL is64bit = [layout is64bit];
-        
+
         if (nodeToSelect.details != nil) {
             [self changeView:is64bit == NO ? e_details : e_details64];
         } else {
             [self changeView:is64bit == NO ? e_hex : e_hex64];
         }
-        
+
         [rightView reloadData];
     }
 }
@@ -672,16 +672,16 @@ enum ViewType {
             if (row == nil) {
                 return;
             }
-            
+
             NSUInteger len = [row.coloumns.dataStr length];
-            
+
             [aCell setFormatter:len > 16
-             ? [MVRightFormatter leftAlignedFormatterWithLength:len]
-                               : [MVRightFormatter plainFormatterWithLength:len]];
+                    ? [MVRightFormatter leftAlignedFormatterWithLength:len]
+                    : [MVRightFormatter plainFormatterWithLength:len]];
         } else {
             NSUInteger colIndex = [[aTableView tableColumns] indexOfObject:aTableColumn];
-            NSUInteger len = MIN(dataController.selectedNode.dataRange.length - rowIndex * 16, (NSUInteger)16);
-            
+            NSUInteger len = MIN(dataController.selectedNode.dataRange.length - rowIndex * 16, (NSUInteger) 16);
+
             if (colIndex == DATA_LO_COLUMN) {
                 [aCell setFormatter:[MVRightFormatter compoundFormatterWithLength:len > 8 ? 8 : len]];
             } else if (colIndex == DATA_HI_COLUMN) {
@@ -705,27 +705,27 @@ enum ViewType {
         if (row == nil) {
             return nil;
         }
-        
+
         NSUInteger colIndex = [[aTableView tableColumns] indexOfObject:aTableColumn];
         NSString *cellContent = [row coloumnAtIndex:colIndex];
-        
+
         // try to find C,C++ symbol prologue
         NSUInteger start = [cellContent rangeOfString:@"_Z"].location;
-        
+
         if (start == NSNotFound) {
             return nil;
         }
-        
+
         NSUInteger stop = [cellContent rangeOfCharacterFromSet:[NSCharacterSet characterSetWithCharactersInString:@")]"]
                                                        options:NSLiteralSearch
                                                          range:NSMakeRange(start, [cellContent length] - start)]
-        .location;
+                .location;
         if (stop == NSNotFound) {
             stop = [cellContent length];
         }
-        
+
         char const *cell_str = CSTRING([cellContent substringWithRange:NSMakeRange(start, stop - start)]);
-        
+
         int status;
         char *sym_str = abi::__cxa_demangle(cell_str, NULL, NULL, &status);
         if (status == 0) {
@@ -734,7 +734,7 @@ enum ViewType {
             return toolTip;
         }
     }
-    
+
     return nil;
 }
 

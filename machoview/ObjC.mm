@@ -329,7 +329,7 @@ struct message_ref64 {
 //------------------------------------------------------------------------------
 - (MVNode *)entryInSectionNode:(MVNode *)node atLocation:(uint32_t)location {
     NSUInteger childCount = [node numberOfChildren];
-    
+
     for (NSUInteger nchild = 0; nchild < childCount; ++nchild) {
         MVNode *child = [node childAtIndex:nchild];
         if (NSLocationInRange(location, child.dataRange)) {
@@ -351,36 +351,36 @@ struct message_ref64 {
         uint32_t cstr;
         uint32_t size;
     };
-    
+
     MVNodeSaver nodeSaver;
     MVNode *node = [parent insertChildWithDetails:caption location:location length:length saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     while (NSMaxRange(range) < location + length) {
         MATCH_STRUCT(cfstring_t, NSMaxRange(range))
-        
+
         // accumulate search info
         NSUInteger bookmark = node.details.rowCount;
         NSString *symbolName = nil;
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"CFString Ptr" col3:[self findSymbolAtRVA:cfstring_t->ptr]];
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"" col3:[self findSymbolAtRVA:cfstring_t->data]];
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"String" col3:(symbolName = [self findSymbolAtRVA:cfstring_t->cstr])];
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Size" col3:[NSString stringWithFormat:@"%u", cfstring_t->size]];
-        
+
         [node.details setAttributesFromRowIndex:bookmark firstArg:MVMetaDataAttributeName, symbolName, nil];
         [node.details setAttributes:MVUnderlineAttributeName, @"YES", nil];
     }
-    
+
     return node;
 }
 
@@ -395,36 +395,36 @@ struct message_ref64 {
         uint64_t cstr;
         uint64_t size;
     };
-    
+
     MVNodeSaver nodeSaver;
     MVNode *node = [parent insertChildWithDetails:caption location:location length:length saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     while (NSMaxRange(range) < location + length) {
         MATCH_STRUCT(cfstring64_t, NSMaxRange(range))
-        
+
         // accumulate search info
         NSUInteger bookmark = node.details.rowCount;
         NSString *symbolName = nil;
-        
+
         [dataController read_uint64:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"CFString Ptr" col3:[self findSymbolAtRVA64:cfstring64_t->ptr]];
-        
+
         [dataController read_uint64:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"" col3:[self findSymbolAtRVA64:cfstring64_t->data]];
-        
+
         [dataController read_uint64:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"String" col3:(symbolName = [self findSymbolAtRVA64:cfstring64_t->cstr])];
-        
+
         [dataController read_uint64:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Size" col3:[NSString stringWithFormat:@"%qu", cfstring64_t->size]];
-        
+
         [node.details setAttributesFromRowIndex:bookmark firstArg:MVMetaDataAttributeName, symbolName, nil];
         [node.details setAttributes:MVUnderlineAttributeName, @"YES", nil];
     }
-    
+
     return node;
 }
 
@@ -435,23 +435,23 @@ struct message_ref64 {
                              length:(uint32_t)length {
     MVNodeSaver nodeSaver;
     MVNode *node = [parent insertChildWithDetails:caption location:location length:length saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     MATCH_STRUCT(objc_image_info, location)
-    
+
     [dataController read_uint32:range
                     lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Version" col3:[NSString stringWithFormat:@"%u", objc_image_info->version]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Flags" col3:@""];
-    
+
     if (objc_image_info->flags & OBJC_IMAGE_IS_REPLACEMENT) [node.details appendRow:@"" col1:@"" col2:@"0x1" col3:@"OBJC_IMAGE_IS_REPLACEMENT"];
     if (objc_image_info->flags & OBJC_IMAGE_SUPPORTS_GC) [node.details appendRow:@"" col1:@"" col2:@"0x2" col3:@"OBJC_IMAGE_SUPPORTS_GC"];
     if (objc_image_info->flags & OBJC_IMAGE_GC_ONLY) [node.details appendRow:@"" col1:@"" col2:@"0x4" col3:@"OBJC_IMAGE_GC_ONLY"];
-    
+
     return node;
 }
 
@@ -464,48 +464,48 @@ struct message_ref64 {
     if (parent == nil) {
         return nil;
     }
-    
+
     // check for duplicates
     MVNode *node = [self entryInSectionNode:parent atLocation:location];
     if (node != nil) {
         return node;
     }
-    
+
     MVNodeSaver nodeSaver;
     node = [parent insertChildWithDetails:[@"Objc Variable List: " stringByAppendingString:caption]
                                  location:location
                                    length:sizeof(struct objc_ivar_list_t) + objc_ivar_list_t->ivar_count * sizeof(struct objc_ivar_t)
                                     saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     [dataController read_int32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Count" col3:[NSString stringWithFormat:@"%i", objc_ivar_list_t->ivar_count]];
-    
+
     [node.details setAttributes:MVCellColorAttributeName, [NSColor greenColor],
-     MVUnderlineAttributeName, @"YES", nil];
-    
+                                MVUnderlineAttributeName, @"YES", nil];
+
     for (int32_t nivar = 0; nivar < objc_ivar_list_t->ivar_count; ++nivar) {
         struct objc_ivar_t const *objc_ivar_t = &objc_ivar_list_t->ivar_list[nivar];
-        
+
         // accumulate search info
         NSUInteger bookmark = node.details.rowCount;
         NSString *symbolName = nil;
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Name" col3:(symbolName = [self findSymbolAtRVA:objc_ivar_t->ivar_name])];
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Type" col3:[self findSymbolAtRVA:objc_ivar_t->ivar_type]];
-        
+
         [dataController read_int32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Offset" col3:[NSString stringWithFormat:@"%u", objc_ivar_t->ivar_offset]];
-        
+
         [node.details setAttributesFromRowIndex:bookmark firstArg:MVMetaDataAttributeName, symbolName, nil];
         [node.details setAttributes:MVUnderlineAttributeName, @"YES", nil];
     }
-    
+
     return node;
 }
 
@@ -518,53 +518,53 @@ struct message_ref64 {
     if (parent == nil) {
         return nil;
     }
-    
+
     // check for duplicates
     MVNode *node = [self entryInSectionNode:parent atLocation:location];
     if (node != nil) {
         return node;
     }
-    
+
     MVNodeSaver nodeSaver;
     node = [parent insertChildWithDetails:[@"Objc Method List: " stringByAppendingString:caption]
                                  location:location
                                    length:sizeof(struct objc_method_list_t) + objc_method_list_t->method_count * sizeof(struct objc_method_t)
                                     saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Obsolete" col3:[NSString stringWithFormat:@"0x%X", objc_method_list_t->obsolete]];
-    
+
     [node.details setAttributes:MVCellColorAttributeName, [NSColor greenColor], nil];
-    
+
     [dataController read_int32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Count" col3:[NSString stringWithFormat:@"%i", objc_method_list_t->method_count]];
-    
+
     [node.details setAttributes:MVCellColorAttributeName, [NSColor greenColor],
-     MVUnderlineAttributeName, @"YES", nil];
-    
+                                MVUnderlineAttributeName, @"YES", nil];
+
     for (int32_t nmeth = 0; nmeth < objc_method_list_t->method_count; ++nmeth) {
         struct objc_method_t const *objc_method_t = &objc_method_list_t->method_list[nmeth];
-        
+
         // accumulate search info
         NSUInteger bookmark = node.details.rowCount;
         NSString *symbolName = nil;
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Name" col3:(symbolName = [self findSymbolAtRVA:objc_method_t->method_name])];
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Types" col3:[self findSymbolAtRVA:objc_method_t->method_types]];
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"IMP (Function Pointer)" col3:[self findSymbolAtRVA:objc_method_t->method_imp]];
-        
+
         [node.details setAttributesFromRowIndex:bookmark firstArg:MVMetaDataAttributeName, symbolName, nil];
         [node.details setAttributes:MVUnderlineAttributeName, @"YES", nil];
     }
-    
+
     return node;
 }
 
@@ -577,41 +577,41 @@ struct message_ref64 {
     if (parent == nil) {
         return nil;
     }
-    
+
     // check for duplicates
     MVNode *node = [self entryInSectionNode:parent atLocation:location];
     if (node != nil) {
         return node;
     }
-    
+
     MVNodeSaver nodeSaver;
     node = [parent insertChildWithDetails:[@"Objc Method Descr List: " stringByAppendingString:caption]
                                  location:location
                                    length:sizeof(struct objc_method_description_list_t) + objc_method_description_list_t->count * sizeof(struct objc_method_description_t)
                                     saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     [dataController read_int32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Count" col3:[NSString stringWithFormat:@"%i", objc_method_description_list_t->count]];
-    
+
     [node.details setAttributes:MVCellColorAttributeName, [NSColor greenColor],
-     MVUnderlineAttributeName, @"YES", nil];
-    
+                                MVUnderlineAttributeName, @"YES", nil];
+
     for (int32_t ndescr = 0; ndescr < objc_method_description_list_t->count; ++ndescr) {
         struct objc_method_description_t const *objc_method_description_t = &objc_method_description_list_t->list[ndescr];
-        
+
         // accumulate search info
         NSUInteger bookmark = node.details.rowCount;
         NSString *symbolName = nil;
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Name" col3:(symbolName = [self findSymbolAtRVA:objc_method_description_t->name])];
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Types" col3:[self findSymbolAtRVA:objc_method_description_t->types]];
-        
+
         [node.details setAttributesFromRowIndex:bookmark firstArg:MVMetaDataAttributeName, symbolName, nil];
         [node.details setAttributes:MVUnderlineAttributeName, @"YES", nil];
     }
@@ -627,39 +627,39 @@ struct message_ref64 {
     if (parent == nil) {
         return nil;
     }
-    
+
     // check for duplicates
     MVNode *node = [self entryInSectionNode:parent atLocation:location];
     if (node != nil) {
         return node;
     }
-    
+
     MVNodeSaver nodeSaver;
     node = [parent insertChildWithDetails:[@"Objc Protocol: " stringByAppendingString:caption]
                                  location:location
                                    length:sizeof(struct objc_protocol_t)
                                     saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"ISA" col3:[self findSymbolAtRVA:objc_protocol_t->isa]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Name" col3:[self findSymbolAtRVA:objc_protocol_t->protocol_name]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Protocol List" col3:[self findSymbolAtRVA:objc_protocol_t->protocol_list]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Instance Method Descrs" col3:[self findSymbolAtRVA:objc_protocol_t->instance_methods]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Class Method Descrs" col3:[self findSymbolAtRVA:objc_protocol_t->class_methods]];
-    
+
     MVNode *childNode = nil;
-    
+
     // embedded protocol lists
     if (objc_protocol_t->protocol_list && (childNode = [self objcSectionNodeContainsRVA:objc_protocol_t->protocol_list])) {
         uint32_t location = [self RVAToFileOffset:objc_protocol_t->protocol_list];
@@ -670,7 +670,7 @@ struct message_ref64 {
                                 location:location
                                protocols:objc_protocol_list_t];
     }
-    
+
     // instance method descriptors
     if (objc_protocol_t->instance_methods && (childNode = [self objcSectionNodeContainsRVA:objc_protocol_t->instance_methods])) {
         uint32_t location = [self RVAToFileOffset:objc_protocol_t->instance_methods];
@@ -681,7 +681,7 @@ struct message_ref64 {
                                 location:location
                             methodDescrs:objc_method_description_list_t];
     }
-    
+
     // class method descriptors
     if (objc_protocol_t->class_methods && (childNode = [self objcSectionNodeContainsRVA:objc_protocol_t->class_methods])) {
         uint32_t location = [self RVAToFileOffset:objc_protocol_t->class_methods];
@@ -692,7 +692,7 @@ struct message_ref64 {
                                 location:location
                             methodDescrs:objc_method_description_list_t];
     }
-    
+
     return node;
 }
 
@@ -705,39 +705,39 @@ struct message_ref64 {
     if (parent == nil) {
         return nil;
     }
-    
+
     // check for duplicates
     MVNode *node = [self entryInSectionNode:parent atLocation:location];
     if (node != nil) {
         return node;
     }
-    
+
     MVNodeSaver nodeSaver;
     node = [parent insertChildWithDetails:[@"Objc Protocol List: " stringByAppendingString:caption]
                                  location:location
                                    length:sizeof(struct objc_protocol_list_t) + objc_protocol_list_t->count * sizeof(uint32_t)
                                     saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Next" col3:[self findSymbolAtRVA:objc_protocol_list_t->next]];
-    
+
     [node.details setAttributes:MVCellColorAttributeName, [NSColor greenColor], nil];
-    
+
     [dataController read_int32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Count" col3:[NSString stringWithFormat:@"%i", objc_protocol_list_t->count]];
-    
+
     [node.details setAttributes:MVCellColorAttributeName, [NSColor greenColor],
-     MVUnderlineAttributeName, @"YES", nil];
-    
+                                MVUnderlineAttributeName, @"YES", nil];
+
     MVNode *childNode = nil;
-    
+
     for (int32_t nprot = 0; nprot < objc_protocol_list_t->count; ++nprot) {
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:[NSString stringWithFormat:@"Protocol[%i]", nprot] col3:[self findSymbolAtRVA:objc_protocol_list_t->list[nprot]]];
-        
+
         if (objc_protocol_list_t->list[nprot] && (childNode = [self objcSectionNodeContainsRVA:objc_protocol_list_t->list[nprot]])) {
             uint32_t location = [self RVAToFileOffset:objc_protocol_list_t->list[nprot]];
             NSString *caption = [self findSymbolAtRVA:objc_protocol_list_t->list[nprot]];
@@ -748,7 +748,7 @@ struct message_ref64 {
                                 protocol:objc_protocol_t];
         }
     }
-    
+
     // next protocol list
     if (objc_protocol_list_t->next && (childNode = [self objcSectionNodeContainsRVA:objc_protocol_list_t->next])) {
         uint32_t location = [self RVAToFileOffset:objc_protocol_list_t->next];
@@ -759,7 +759,7 @@ struct message_ref64 {
                                 location:location
                                protocols:objc_protocol_list_t];
     }
-    
+
     return node;
 }
 
@@ -772,37 +772,37 @@ struct message_ref64 {
     if (parent == nil) {
         return nil;
     }
-    
+
     // check for duplicates
     MVNode *node = [self entryInSectionNode:parent atLocation:location];
     if (node != nil) {
         return node;
     }
-    
+
     MVNodeSaver nodeSaver;
     node = [parent insertChildWithDetails:[@"Objc Class: " stringByAppendingString:caption]
                                  location:location
                                    length:sizeof(struct objc_class_t)
                                     saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"ISA" col3:[self findSymbolAtRVA:objc_class_t->isa]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Super Class" col3:[self findSymbolAtRVA:objc_class_t->super_class]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Name" col3:[self findSymbolAtRVA:objc_class_t->name]];
-    
+
     [dataController read_int32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Version" col3:[NSString stringWithFormat:@"%i", objc_class_t->version]];
-    
+
     [dataController read_int32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Info" col3:@""];
-    
+
     if (objc_class_t->info & 0x1) [node.details appendRow:@"" col1:@"" col2:@"    1" col3:@"CLS_CLASS"];
     if (objc_class_t->info & 0x2) [node.details appendRow:@"" col1:@"" col2:@"    2" col3:@"CLS_META"];
     if (objc_class_t->info & 0x4) [node.details appendRow:@"" col1:@"" col2:@"    4" col3:@"CLS_INITIALIZED"];
@@ -821,24 +821,24 @@ struct message_ref64 {
     if (objc_class_t->info & 0x8000) [node.details appendRow:@"" col1:@"" col2:@" 8000" col3:@"CLS_HAS_LOAD_METHOD"];
     if (objc_class_t->info & 0x10000) [node.details appendRow:@"" col1:@"" col2:@"10000" col3:@"CLS_CONSTRUCTING"];
     if (objc_class_t->info & 0x20000) [node.details appendRow:@"" col1:@"" col2:@"20000" col3:@"CLS_EXT"];
-    
+
     [dataController read_int32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Instance Size" col3:[NSString stringWithFormat:@"%i", objc_class_t->instance_size]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Instance Vars" col3:[self findSymbolAtRVA:objc_class_t->ivars]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Method Lists" col3:[self findSymbolAtRVA:objc_class_t->methodLists]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Cache" col3:[self findSymbolAtRVA:objc_class_t->cache]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Protocols" col3:[self findSymbolAtRVA:objc_class_t->protocols]];
-    
+
     MVNode *childNode = nil;
-    
+
     // Meta Classes
     if (objc_class_t->isa && (childNode = [self objcSectionNodeContainsRVA:objc_class_t->isa]) && (objc_class_t->info & 0x1) == 0x1) {
         uint32_t location = [self RVAToFileOffset:objc_class_t->isa];
@@ -849,7 +849,7 @@ struct message_ref64 {
                          location:location
                         objcClass:objc_class_t];
     }
-    
+
     // Instance Variables
     if (objc_class_t->ivars && (childNode = [self objcSectionNodeContainsRVA:objc_class_t->ivars])) {
         uint32_t location = [self RVAToFileOffset:objc_class_t->ivars];
@@ -860,7 +860,7 @@ struct message_ref64 {
                              location:location
                                 ivars:objc_ivar_list_t];
     }
-    
+
     // Methods
     if (objc_class_t->methodLists && (childNode = [self objcSectionNodeContainsRVA:objc_class_t->methodLists])) {
         uint32_t location = [self RVAToFileOffset:objc_class_t->methodLists];
@@ -871,7 +871,7 @@ struct message_ref64 {
                            location:location
                             methods:objc_method_list_t];
     }
-    
+
     // Protocols
     if (objc_class_t->protocols && (childNode = [self objcSectionNodeContainsRVA:objc_class_t->protocols])) {
         uint32_t location = [self RVAToFileOffset:objc_class_t->protocols];
@@ -882,7 +882,7 @@ struct message_ref64 {
                                 location:location
                                protocols:objc_protocol_list_t];
     }
-    
+
     return node;
 }
 
@@ -895,44 +895,44 @@ struct message_ref64 {
     if (parent == nil) {
         return nil;
     }
-    
+
     // check for duplicates
     MVNode *node = [self entryInSectionNode:parent atLocation:location];
     if (node != nil) {
         return node;
     }
-    
+
     MVNodeSaver nodeSaver;
     node = [parent insertChildWithDetails:[@"Objc Category: " stringByAppendingString:caption]
                                  location:location
                                    length:sizeof(struct objc_category_t)
                                     saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     NSString *className;
     NSString *categoryName;
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Name" col3:categoryName = [self findSymbolAtRVA:objc_category_t->category_name]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Class Name" col3:className = [self findSymbolAtRVA:objc_category_t->class_name]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Instance Methods" col3:[NSString stringWithFormat:@"0x%X", objc_category_t->instance_methods]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Class Methods" col3:[NSString stringWithFormat:@"0x%X", objc_category_t->class_methods]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Protocols" col3:[NSString stringWithFormat:@"0x%X", objc_category_t->protocols]];
-    
+
     node.caption = [NSString stringWithFormat:@"%@ [%@ %@]", node.caption, className, categoryName];
-    
+
     MVNode *childNode = nil;
-    
+
     // Instance Methods
     if (objc_category_t->instance_methods && (childNode = [self objcSectionNodeContainsRVA:objc_category_t->instance_methods])) {
         uint32_t location = [self RVAToFileOffset:objc_category_t->instance_methods];
@@ -943,7 +943,7 @@ struct message_ref64 {
                            location:location
                             methods:objc_method_list_t];
     }
-    
+
     // Class Methods
     if (objc_category_t->class_methods && (childNode = [self objcSectionNodeContainsRVA:objc_category_t->class_methods])) {
         uint32_t location = [self RVAToFileOffset:objc_category_t->class_methods];
@@ -954,7 +954,7 @@ struct message_ref64 {
                            location:location
                             methods:objc_method_list_t];
     }
-    
+
     // Protocols
     if (objc_category_t->protocols && (childNode = [self objcSectionNodeContainsRVA:objc_category_t->protocols])) {
         uint32_t location = [self RVAToFileOffset:objc_category_t->protocols];
@@ -965,7 +965,7 @@ struct message_ref64 {
                                 location:location
                                protocols:objc_protocol_list_t];
     }
-    
+
     return node;
 }
 
@@ -978,42 +978,42 @@ struct message_ref64 {
     if (parent == nil) {
         return nil;
     }
-    
+
     // check for duplicates
     MVNode *node = [self entryInSectionNode:parent atLocation:location];
     if (node != nil) {
         return node;
     }
-    
+
     MVNodeSaver nodeSaver;
     node = [parent insertChildWithDetails:[@"Objc Symtab: " stringByAppendingString:caption]
                                  location:location
                                    length:sizeof(struct objc_symtab_t) + (objc_symtab_t->cls_def_cnt + objc_symtab_t->cat_def_cnt) * sizeof(uint32_t)
                                     saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Selector Reference Count" col3:[NSString stringWithFormat:@"%u", objc_symtab_t->sel_ref_cnt]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"References" col3:[self findSymbolAtRVA:objc_symtab_t->refs]];
-    
+
     [dataController read_uint16:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Class Definition Count" col3:[NSString stringWithFormat:@"%u", objc_symtab_t->cls_def_cnt]];
-    
+
     [dataController read_uint16:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Category Definition Count" col3:[NSString stringWithFormat:@"%u", objc_symtab_t->cat_def_cnt]];
-    
+
     // processing definitions
     for (uint32_t ndef = 0; ndef < objc_symtab_t->cls_def_cnt + objc_symtab_t->cat_def_cnt; ++ndef) {
         uint32_t location = [self RVAToFileOffset:objc_symtab_t->defs[ndef]];
         NSString *caption = [self findSymbolAtRVA:objc_symtab_t->defs[ndef]];
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:[NSString stringWithFormat:@"Definition[%u]", ndef] col3:caption];
-        
+
         MVNode *childNode = [self objcSectionNodeContainsRVA:objc_symtab_t->defs[ndef]];
         if (childNode) {
             // Class Definitions
@@ -1024,7 +1024,7 @@ struct message_ref64 {
                                  location:location
                                 objcClass:objc_class_t];
             }
-            // Category Definitions
+                // Category Definitions
             else {
                 MATCH_STRUCT(objc_category_t, location)
                 [self createObjCCategoryNode:childNode
@@ -1034,7 +1034,7 @@ struct message_ref64 {
             }
         }
     }
-    
+
     return node;
 }
 
@@ -1045,34 +1045,34 @@ struct message_ref64 {
                            length:(uint32_t)length {
     MVNodeSaver nodeSaver;
     MVNode *node = [parent insertChildWithDetails:caption location:location length:length saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     while (NSMaxRange(range) < location + length) {
         MATCH_STRUCT(objc_module_t, NSMaxRange(range))
-        
+
         // accumulate search info
         NSUInteger bookmark = node.details.rowCount;
         NSString *symbolName = nil;
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Version" col3:[NSString stringWithFormat:@"%u", objc_module_t->version]];
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Size" col3:[NSString stringWithFormat:@"%u", objc_module_t->size]];
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Name" col3:(symbolName = [self findSymbolAtRVA:objc_module_t->name])];
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Symtab" col3:[self findSymbolAtRVA:objc_module_t->symtab]];
-        
+
         [node.details setAttributesFromRowIndex:bookmark firstArg:MVMetaDataAttributeName, symbolName, nil];
         [node.details setAttributes:MVUnderlineAttributeName, @"YES", nil];
-        
+
         MVNode *childNode = nil;
-        
+
         // symbol table
         if (objc_module_t->symtab && (childNode = [self objcSectionNodeContainsRVA:objc_module_t->symtab])) {
             uint32_t location = [self RVAToFileOffset:objc_module_t->symtab];
@@ -1084,7 +1084,7 @@ struct message_ref64 {
                             objcSymtab:objc_symtab_t];
         }
     }
-    
+
     return node;
 }
 
@@ -1095,24 +1095,24 @@ struct message_ref64 {
                             length:(uint32_t)length {
     MVNodeSaver nodeSaver;
     MVNode *node = [parent insertChildWithDetails:caption location:location length:length saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     while (NSMaxRange(range) < location + length) {
         uint32_t value1 = [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Size" col3:[NSString stringWithFormat:@"%u", value1]];
-        
+
         uint32_t value2 = [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"" col3:[NSString stringWithFormat:@"%u", value2]];
-        
+
         uint32_t propertyList = [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Property List" col3:[NSString stringWithFormat:@"0x%X", propertyList]];
-        
+
         [node.details setAttributes:MVUnderlineAttributeName, @"YES", nil];
-        
+
         MVNode *childNode = nil;
-        
+
         // Instance Properties
         if (propertyList && (childNode = [self sectionNodeContainsRVA:propertyList])) {
             uint32_t location = [self RVAToFileOffset:propertyList];
@@ -1124,7 +1124,7 @@ struct message_ref64 {
                                    properties:objc_property_list];
         }
     }
-    
+
     return node;
 }
 
@@ -1135,27 +1135,27 @@ struct message_ref64 {
                                length:(uint32_t)length {
     MVNodeSaver nodeSaver;
     MVNode *node = [parent insertChildWithDetails:caption location:location length:length saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     while (NSMaxRange(range) < location + length) {
         uint32_t value1 = [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Size" col3:[NSString stringWithFormat:@"%u", value1]];
-        
+
         uint32_t value2 = [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Method Descrs" col3:[NSString stringWithFormat:@"0x%X", value2]];
-        
+
         uint32_t value3 = [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"" col3:[NSString stringWithFormat:@"%u", value3]];
-        
+
         uint32_t value4 = [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"" col3:[NSString stringWithFormat:@"%u", value4]];
-        
+
         [node.details setAttributes:MVUnderlineAttributeName, @"YES", nil];
-        
+
         MVNode *childNode = nil;
-        
+
         // instance method descriptors
         if (value2 && (childNode = [self objcSectionNodeContainsRVA:value2])) {
             uint32_t location = [self RVAToFileOffset:value2];
@@ -1167,7 +1167,7 @@ struct message_ref64 {
                                 methodDescrs:objc_method_description_list_t];
         }
     }
-    
+
     return node;
 }
 
@@ -1179,22 +1179,22 @@ struct message_ref64 {
                               pointers:(PointerVector &)pointers {
     MVNodeSaver nodeSaver;
     MVNode *node = [parent insertChildWithDetails:caption location:location length:length saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     while (NSMaxRange(range) < location + length) {
         // accumulate search info
         NSString *symbolName = nil;
-        
+
         uint32_t rva = [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Pointer" col3:(symbolName = [self findSymbolAtRVA:rva])];
-        
+
         [node.details setAttributes:MVMetaDataAttributeName, symbolName, nil];
-        
+
         pointers.push_back(rva);
     }
-    
+
     return node;
 }
 
@@ -1206,22 +1206,22 @@ struct message_ref64 {
                                 pointers:(Pointer64Vector &)pointers {
     MVNodeSaver nodeSaver;
     MVNode *node = [parent insertChildWithDetails:caption location:location length:length saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     while (NSMaxRange(range) < location + length) {
         // accumulate search info
         NSString *symbolName = nil;
-        
+
         uint64_t rva64 = [dataController read_uint64:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Pointer" col3:(symbolName = [self findSymbolAtRVA64:rva64])];
-        
+
         [node.details setAttributes:MVMetaDataAttributeName, symbolName, nil];
-        
+
         pointers.push_back(rva64);
     }
-    
+
     return node;
 }
 
@@ -1232,27 +1232,27 @@ struct message_ref64 {
                             length:(uint32_t)length {
     MVNodeSaver nodeSaver;
     MVNode *node = [parent insertChildWithDetails:caption location:location length:length saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     while (NSMaxRange(range) < location + length) {
         MATCH_STRUCT(message_ref, NSMaxRange(range))
-        
+
         // accumulate search info
         NSUInteger bookmark = node.details.rowCount;
         NSString *symbolName = nil;
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"IMP" col3:[self findSymbolAtRVA:message_ref->imp]];
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"SEL" col3:(symbolName = [self findSymbolAtRVA:message_ref->sel])];
-        
+
         [node.details setAttributes:MVUnderlineAttributeName, @"YES", nil];
         [node.details setAttributesFromRowIndex:bookmark firstArg:MVMetaDataAttributeName, symbolName, nil];
     }
-    
+
     return node;
 }
 
@@ -1263,27 +1263,27 @@ struct message_ref64 {
                               length:(uint32_t)length {
     MVNodeSaver nodeSaver;
     MVNode *node = [parent insertChildWithDetails:caption location:location length:length saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     while (NSMaxRange(range) < location + length) {
         MATCH_STRUCT(message_ref64, NSMaxRange(range))
-        
+
         // accumulate search info
         NSUInteger bookmark = node.details.rowCount;
         NSString *symbolName = nil;
-        
+
         [dataController read_uint64:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"IMP" col3:[self findSymbolAtRVA64:message_ref64->imp]];
-        
+
         [dataController read_uint64:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"SEL" col3:(symbolName = [self findSymbolAtRVA64:message_ref64->sel])];
-        
+
         [node.details setAttributes:MVUnderlineAttributeName, @"YES", nil];
         [node.details setAttributesFromRowIndex:bookmark firstArg:MVMetaDataAttributeName, symbolName, nil];
     }
-    
+
     return node;
 }
 
@@ -1296,53 +1296,53 @@ struct message_ref64 {
     if (parent == nil) {
         return nil;
     }
-    
+
     // check for duplicates
     MVNode *node = [self entryInSectionNode:parent atLocation:location];
     if (node != nil) {
         return node;
     }
-    
+
     MVNodeSaver nodeSaver;
     node = [parent insertChildWithDetails:[@"ObjC2 Method List: " stringByAppendingString:caption]
                                  location:location
                                    length:sizeof(struct method_list_t) + method_list_t->count * sizeof(struct method_t)
                                     saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Entry Size" col3:[NSString stringWithFormat:@"%u", method_list_t->entsize]];
-    
+
     [node.details setAttributes:MVCellColorAttributeName, [NSColor greenColor], nil];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Count" col3:[NSString stringWithFormat:@"%u", method_list_t->count]];
-    
+
     [node.details setAttributes:MVCellColorAttributeName, [NSColor greenColor],
-     MVUnderlineAttributeName, @"YES", nil];
-    
+                                MVUnderlineAttributeName, @"YES", nil];
+
     for (uint32_t nmeth = 0; nmeth < method_list_t->count; ++nmeth) {
         MATCH_STRUCT(method_t, NSMaxRange(range))
-        
+
         // accumulate search info
         NSUInteger bookmark = node.details.rowCount;
         NSString *symbolName = nil;
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Name" col3:(symbolName = [self findSymbolAtRVA:method_t->name])];
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Types" col3:[self findSymbolAtRVA:method_t->types]];
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Implementation" col3:[self findSymbolAtRVA:method_t->imp]];
-        
+
         [node.details setAttributesFromRowIndex:bookmark firstArg:MVMetaDataAttributeName, symbolName, nil];
         [node.details setAttributes:MVUnderlineAttributeName, @"YES", nil];
     }
-    
+
     return node;
 }
 
@@ -1355,53 +1355,53 @@ struct message_ref64 {
     if (parent == nil) {
         return nil;
     }
-    
+
     // check for duplicates
     MVNode *node = [self entryInSectionNode:parent atLocation:location];
     if (node != nil) {
         return node;
     }
-    
+
     MVNodeSaver nodeSaver;
     node = [parent insertChildWithDetails:[@"ObjC2 Method64 List: " stringByAppendingString:caption]
                                  location:location
                                    length:sizeof(struct method64_list_t) + method64_list_t->count * sizeof(struct method64_t)
                                     saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Entry Size" col3:[NSString stringWithFormat:@"%u", method64_list_t->entsize]];
-    
+
     [node.details setAttributes:MVCellColorAttributeName, [NSColor greenColor], nil];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Count" col3:[NSString stringWithFormat:@"%u", method64_list_t->count]];
-    
+
     [node.details setAttributes:MVCellColorAttributeName, [NSColor greenColor],
-     MVUnderlineAttributeName, @"YES", nil];
-    
+                                MVUnderlineAttributeName, @"YES", nil];
+
     for (uint32_t nmeth = 0; nmeth < method64_list_t->count; ++nmeth) {
         MATCH_STRUCT(method64_t, NSMaxRange(range))
-        
+
         // accumulate search info
         NSUInteger bookmark = node.details.rowCount;
         NSString *symbolName = nil;
-        
+
         [dataController read_uint64:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Name" col3:(symbolName = [self findSymbolAtRVA64:method64_t->name])];
-        
+
         [dataController read_uint64:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Types" col3:[self findSymbolAtRVA64:method64_t->types]];
-        
+
         [dataController read_uint64:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Implementation" col3:[self findSymbolAtRVA64:method64_t->imp]];
-        
+
         [node.details setAttributesFromRowIndex:bookmark firstArg:MVMetaDataAttributeName, symbolName, nil];
         [node.details setAttributes:MVUnderlineAttributeName, @"YES", nil];
     }
-    
+
     return node;
 }
 
@@ -1414,50 +1414,50 @@ struct message_ref64 {
     if (parent == nil) {
         return nil;
     }
-    
+
     // check for duplicates
     MVNode *node = [self entryInSectionNode:parent atLocation:location];
     if (node != nil) {
         return node;
     }
-    
+
     MVNodeSaver nodeSaver;
     node = [parent insertChildWithDetails:[@"ObjC2 Property List: " stringByAppendingString:caption]
                                  location:location
                                    length:sizeof(struct objc_property_list) + objc_property_list->count * sizeof(struct objc_property)
                                     saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Entry Size" col3:[NSString stringWithFormat:@"%u", objc_property_list->entsize]];
-    
+
     [node.details setAttributes:MVCellColorAttributeName, [NSColor greenColor], nil];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Count" col3:[NSString stringWithFormat:@"%u", objc_property_list->count]];
-    
+
     [node.details setAttributes:MVCellColorAttributeName, [NSColor greenColor],
-     MVUnderlineAttributeName, @"YES", nil];
-    
+                                MVUnderlineAttributeName, @"YES", nil];
+
     for (uint32_t nprop = 0; nprop < objc_property_list->count; ++nprop) {
         MATCH_STRUCT(objc_property, NSMaxRange(range))
-        
+
         // accumulate search info
         NSUInteger bookmark = node.details.rowCount;
         NSString *symbolName = nil;
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Name" col3:(symbolName = [self findSymbolAtRVA:objc_property->name])];
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Attributes" col3:[self findSymbolAtRVA:objc_property->attributes]];
-        
+
         [node.details setAttributesFromRowIndex:bookmark firstArg:MVMetaDataAttributeName, symbolName, nil];
         [node.details setAttributes:MVUnderlineAttributeName, @"YES", nil];
     }
-    
+
     return node;
 }
 
@@ -1470,50 +1470,50 @@ struct message_ref64 {
     if (parent == nil) {
         return nil;
     }
-    
+
     // check for duplicates
     MVNode *node = [self entryInSectionNode:parent atLocation:location];
     if (node != nil) {
         return node;
     }
-    
+
     MVNodeSaver nodeSaver;
     node = [parent insertChildWithDetails:[@"ObjC2 Property64 List: " stringByAppendingString:caption]
                                  location:location
                                    length:sizeof(struct objc_property64_list) + objc_property64_list->count * sizeof(struct objc_property64)
                                     saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Entry Size" col3:[NSString stringWithFormat:@"%u", objc_property64_list->entsize]];
-    
+
     [node.details setAttributes:MVCellColorAttributeName, [NSColor greenColor], nil];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Count" col3:[NSString stringWithFormat:@"%u", objc_property64_list->count]];
-    
+
     [node.details setAttributes:MVCellColorAttributeName, [NSColor greenColor],
-     MVUnderlineAttributeName, @"YES", nil];
-    
+                                MVUnderlineAttributeName, @"YES", nil];
+
     for (uint32_t nprop = 0; nprop < objc_property64_list->count; ++nprop) {
         MATCH_STRUCT(objc_property64, NSMaxRange(range))
-        
+
         // accumulate search info
         NSUInteger bookmark = node.details.rowCount;
         NSString *symbolName = nil;
-        
+
         [dataController read_uint64:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Name" col3:(symbolName = [self findSymbolAtRVA64:objc_property64->name])];
-        
+
         [dataController read_uint64:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Attributes" col3:[self findSymbolAtRVA64:objc_property64->attributes]];
-        
+
         [node.details setAttributesFromRowIndex:bookmark firstArg:MVMetaDataAttributeName, symbolName, nil];
         [node.details setAttributes:MVUnderlineAttributeName, @"YES", nil];
     }
-    
+
     return node;
 }
 
@@ -1526,48 +1526,48 @@ struct message_ref64 {
     if (parent == nil) {
         return nil;
     }
-    
+
     // check for duplicates
     MVNode *node = [self entryInSectionNode:parent atLocation:location];
     if (node != nil) {
         return node;
     }
-    
+
     MVNodeSaver nodeSaver;
     node = [parent insertChildWithDetails:[@"ObjC2 Protocol: " stringByAppendingString:caption]
                                  location:location
                                    length:sizeof(struct protocol_t)
                                     saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"ISA" col3:[self findSymbolAtRVA:protocol_t->isa]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Name" col3:[self findSymbolAtRVA:protocol_t->name]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Protocols" col3:[self findSymbolAtRVA:protocol_t->protocols]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Instance Methods" col3:[self findSymbolAtRVA:protocol_t->instanceMethods]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Class Methods" col3:[self findSymbolAtRVA:protocol_t->classMethods]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Optional Inst Methods" col3:[self findSymbolAtRVA:protocol_t->optionalInstanceMethods]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Optional Class Methods" col3:[self findSymbolAtRVA:protocol_t->optionalClassMethods]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Instance Properties" col3:[self findSymbolAtRVA:protocol_t->instanceProperties]];
-    
+
     MVNode *childNode = nil;
-    
+
     // Protocols
     if (protocol_t->protocols && (childNode = [self sectionNodeContainsRVA:protocol_t->protocols])) {
         uint32_t location = [self RVAToFileOffset:protocol_t->protocols];
@@ -1578,7 +1578,7 @@ struct message_ref64 {
                                  location:location
                                 protocols:protocol_list_t];
     }
-    
+
     // Instance Methods
     if (protocol_t->instanceMethods && (childNode = [self sectionNodeContainsRVA:protocol_t->instanceMethods])) {
         uint32_t location = [self RVAToFileOffset:protocol_t->instanceMethods];
@@ -1589,7 +1589,7 @@ struct message_ref64 {
                                location:location
                                 methods:method_list_t];
     }
-    
+
     // Class Methods
     if (protocol_t->classMethods && (childNode = [self sectionNodeContainsRVA:protocol_t->classMethods])) {
         uint32_t location = [self RVAToFileOffset:protocol_t->classMethods];
@@ -1600,7 +1600,7 @@ struct message_ref64 {
                                location:location
                                 methods:method_list_t];
     }
-    
+
     // Optional Instance Methods
     if (protocol_t->optionalInstanceMethods && (childNode = [self sectionNodeContainsRVA:protocol_t->optionalInstanceMethods])) {
         uint32_t location = [self RVAToFileOffset:protocol_t->optionalInstanceMethods];
@@ -1611,7 +1611,7 @@ struct message_ref64 {
                                location:location
                                 methods:method_list_t];
     }
-    
+
     // Optional Class Methods
     if (protocol_t->optionalClassMethods && (childNode = [self sectionNodeContainsRVA:protocol_t->optionalClassMethods])) {
         uint32_t location = [self RVAToFileOffset:protocol_t->optionalClassMethods];
@@ -1622,7 +1622,7 @@ struct message_ref64 {
                                location:location
                                 methods:method_list_t];
     }
-    
+
     // Instance Properties
     if (protocol_t->instanceProperties && (childNode = [self sectionNodeContainsRVA:protocol_t->instanceProperties])) {
         uint32_t location = [self RVAToFileOffset:protocol_t->instanceProperties];
@@ -1633,7 +1633,7 @@ struct message_ref64 {
                                  location:location
                                properties:objc_property_list];
     }
-    
+
     return node;
 }
 
@@ -1646,48 +1646,48 @@ struct message_ref64 {
     if (parent == nil) {
         return nil;
     }
-    
+
     // check for duplicates
     MVNode *node = [self entryInSectionNode:parent atLocation:location];
     if (node != nil) {
         return node;
     }
-    
+
     MVNodeSaver nodeSaver;
     node = [parent insertChildWithDetails:[@"ObjC2 Protocol64: " stringByAppendingString:caption]
                                  location:location
                                    length:sizeof(struct protocol64_t)
                                     saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"ISA" col3:[self findSymbolAtRVA64:protocol64_t->isa]];
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Name" col3:[self findSymbolAtRVA64:protocol64_t->name]];
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Protocols" col3:[self findSymbolAtRVA64:protocol64_t->protocols]];
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Instance Methods" col3:[self findSymbolAtRVA64:protocol64_t->instanceMethods]];
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Class Methods" col3:[self findSymbolAtRVA64:protocol64_t->classMethods]];
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Optional Inst Methods" col3:[self findSymbolAtRVA64:protocol64_t->optionalInstanceMethods]];
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Optional Class Methods" col3:[self findSymbolAtRVA64:protocol64_t->optionalClassMethods]];
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Instance Properties" col3:[self findSymbolAtRVA64:protocol64_t->instanceProperties]];
-    
+
     MVNode *childNode = nil;
-    
+
     // Protocols
     if (protocol64_t->protocols && (childNode = [self sectionNodeContainsRVA64:protocol64_t->protocols])) {
         uint32_t location = [self RVA64ToFileOffset:protocol64_t->protocols];
@@ -1698,7 +1698,7 @@ struct message_ref64 {
                                    location:location
                                   protocols:protocol64_list_t];
     }
-    
+
     // Instance Methods
     if (protocol64_t->instanceMethods && (childNode = [self sectionNodeContainsRVA64:protocol64_t->instanceMethods])) {
         uint32_t location = [self RVA64ToFileOffset:protocol64_t->instanceMethods];
@@ -1709,7 +1709,7 @@ struct message_ref64 {
                                  location:location
                                   methods:method64_list_t];
     }
-    
+
     // Class Methods
     if (protocol64_t->classMethods && (childNode = [self sectionNodeContainsRVA64:protocol64_t->classMethods])) {
         uint32_t location = [self RVA64ToFileOffset:protocol64_t->classMethods];
@@ -1720,7 +1720,7 @@ struct message_ref64 {
                                  location:location
                                   methods:method64_list_t];
     }
-    
+
     // Optional Instance Methods
     if (protocol64_t->optionalInstanceMethods && (childNode = [self sectionNodeContainsRVA64:protocol64_t->optionalInstanceMethods])) {
         uint32_t location = [self RVA64ToFileOffset:protocol64_t->optionalInstanceMethods];
@@ -1731,7 +1731,7 @@ struct message_ref64 {
                                  location:location
                                   methods:method64_list_t];
     }
-    
+
     // Optional Class Methods
     if (protocol64_t->optionalClassMethods && (childNode = [self sectionNodeContainsRVA64:protocol64_t->optionalClassMethods])) {
         uint32_t location = [self RVA64ToFileOffset:protocol64_t->optionalClassMethods];
@@ -1742,7 +1742,7 @@ struct message_ref64 {
                                  location:location
                                   methods:method64_list_t];
     }
-    
+
     // Instance Properties
     if (protocol64_t->instanceProperties && (childNode = [self sectionNodeContainsRVA64:protocol64_t->instanceProperties])) {
         uint32_t location = [self RVA64ToFileOffset:protocol64_t->instanceProperties];
@@ -1753,7 +1753,7 @@ struct message_ref64 {
                                    location:location
                                  properties:objc_property64_list];
     }
-    
+
     return node;
 }
 
@@ -1766,32 +1766,32 @@ struct message_ref64 {
     if (parent == nil) {
         return nil;
     }
-    
+
     // check for duplicates
     MVNode *node = [self entryInSectionNode:parent atLocation:location];
     if (node != nil) {
         return node;
     }
-    
+
     MVNodeSaver nodeSaver;
     node = [parent insertChildWithDetails:[@"ObjC2 Protocol List: " stringByAppendingString:caption]
                                  location:location
                                    length:sizeof(struct protocol_list_t) + protocol_list_t->count * sizeof(uint32_t)
                                     saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Count" col3:[NSString stringWithFormat:@"%u", protocol_list_t->count]];
-    
+
     [node.details setAttributes:MVCellColorAttributeName, [NSColor greenColor],
-     MVUnderlineAttributeName, @"YES", nil];
-    
+                                MVUnderlineAttributeName, @"YES", nil];
+
     for (uint32_t nprot = 0; nprot < protocol_list_t->count; ++nprot) {
         uint32_t protocolAddr = [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:[NSString stringWithFormat:@"list[%u]", nprot] col3:[self findSymbolAtRVA:protocolAddr]];
-        
+
         MVNode *childNode = [self sectionNodeContainsRVA:protocolAddr];
         if (childNode) {
             uint32_t location = [self RVAToFileOffset:protocolAddr];
@@ -1803,7 +1803,7 @@ struct message_ref64 {
                                  protocol:protocol_t];
         }
     }
-    
+
     return node;
 }
 
@@ -1816,32 +1816,32 @@ struct message_ref64 {
     if (parent == nil) {
         return nil;
     }
-    
+
     // check for duplicates
     MVNode *node = [self entryInSectionNode:parent atLocation:location];
     if (node != nil) {
         return node;
     }
-    
+
     MVNodeSaver nodeSaver;
     node = [parent insertChildWithDetails:[@"ObjC2 Protocol64 List: " stringByAppendingString:caption]
                                  location:location
                                    length:sizeof(struct protocol64_list_t) + protocol64_list_t->count * sizeof(uint64_t)
                                     saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Count" col3:[NSString stringWithFormat:@"%qu", protocol64_list_t->count]];
-    
+
     [node.details setAttributes:MVCellColorAttributeName, [NSColor greenColor],
-     MVUnderlineAttributeName, @"YES", nil];
-    
+                                MVUnderlineAttributeName, @"YES", nil];
+
     for (uint64_t nprot = 0; nprot < protocol64_list_t->count; ++nprot) {
         uint64_t protocolAddr = [dataController read_uint64:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:[NSString stringWithFormat:@"list[%qu]", nprot] col3:[self findSymbolAtRVA64:protocolAddr]];
-        
+
         MVNode *childNode = [self sectionNodeContainsRVA64:protocolAddr];
         if (childNode) {
             uint32_t location = [self RVA64ToFileOffset:protocolAddr];
@@ -1853,7 +1853,7 @@ struct message_ref64 {
                                    protocol:protocol64_t];
         }
     }
-    
+
     return node;
 }
 
@@ -1866,59 +1866,59 @@ struct message_ref64 {
     if (parent == nil) {
         return nil;
     }
-    
+
     // check for duplicates
     MVNode *node = [self entryInSectionNode:parent atLocation:location];
     if (node != nil) {
         return node;
     }
-    
+
     MVNodeSaver nodeSaver;
     node = [parent insertChildWithDetails:[@"ObjC2 Variable List: " stringByAppendingString:caption]
                                  location:location
                                    length:sizeof(struct ivar_list_t) + ivar_list_t->count * sizeof(struct ivar_t)
                                     saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Entry Size" col3:[NSString stringWithFormat:@"%u", ivar_list_t->entsize]];
-    
+
     [node.details setAttributes:MVCellColorAttributeName, [NSColor greenColor], nil];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Count" col3:[NSString stringWithFormat:@"%u", ivar_list_t->count]];
-    
+
     [node.details setAttributes:MVCellColorAttributeName, [NSColor greenColor],
-     MVUnderlineAttributeName, @"YES", nil];
-    
+                                MVUnderlineAttributeName, @"YES", nil];
+
     for (uint32_t nvar = 0; nvar < ivar_list_t->count; ++nvar) {
         MATCH_STRUCT(ivar_t, NSMaxRange(range))
-        
+
         // accumulate search info
         NSUInteger bookmark = node.details.rowCount;
         NSString *symbolName = nil;
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Offset" col3:[self findSymbolAtRVA:ivar_t->offset]];
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Name" col3:(symbolName = [self findSymbolAtRVA:ivar_t->name])];
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Type" col3:[self findSymbolAtRVA:ivar_t->type]];
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Alignment" col3:[NSString stringWithFormat:@"%u", ivar_t->alignment]];
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Size" col3:[NSString stringWithFormat:@"%u", ivar_t->size]];
-        
+
         [node.details setAttributesFromRowIndex:bookmark firstArg:MVMetaDataAttributeName, symbolName, nil];
         [node.details setAttributes:MVUnderlineAttributeName, @"YES", nil];
     }
-    
+
     return node;
 }
 
@@ -1931,59 +1931,59 @@ struct message_ref64 {
     if (parent == nil) {
         return nil;
     }
-    
+
     // check for duplicates
     MVNode *node = [self entryInSectionNode:parent atLocation:location];
     if (node != nil) {
         return node;
     }
-    
+
     MVNodeSaver nodeSaver;
     node = [parent insertChildWithDetails:[@"ObjC2 Variable64 List: " stringByAppendingString:caption]
                                  location:location
                                    length:sizeof(struct ivar64_list_t) + ivar64_list_t->count * sizeof(struct ivar64_t)
                                     saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Entry Size" col3:[NSString stringWithFormat:@"%u", ivar64_list_t->entsize]];
-    
+
     [node.details setAttributes:MVCellColorAttributeName, [NSColor greenColor], nil];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Count" col3:[NSString stringWithFormat:@"%u", ivar64_list_t->count]];
-    
+
     [node.details setAttributes:MVCellColorAttributeName, [NSColor greenColor],
-     MVUnderlineAttributeName, @"YES", nil];
-    
+                                MVUnderlineAttributeName, @"YES", nil];
+
     for (uint32_t nvar = 0; nvar < ivar64_list_t->count; ++nvar) {
         MATCH_STRUCT(ivar64_t, NSMaxRange(range))
-        
+
         // accumulate search info
         NSUInteger bookmark = node.details.rowCount;
         NSString *symbolName = nil;
-        
+
         [dataController read_uint64:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Offset" col3:[self findSymbolAtRVA64:ivar64_t->offset]];
-        
+
         [dataController read_uint64:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Name" col3:(symbolName = [self findSymbolAtRVA64:ivar64_t->name])];
-        
+
         [dataController read_uint64:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Type" col3:[self findSymbolAtRVA64:ivar64_t->type]];
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Alignment" col3:[NSString stringWithFormat:@"%u", ivar64_t->alignment]];
-        
+
         [dataController read_uint32:range lastReadHex:&lastReadHex];
         [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Size" col3:[NSString stringWithFormat:@"%u", ivar64_t->size]];
-        
+
         [node.details setAttributesFromRowIndex:bookmark firstArg:MVMetaDataAttributeName, symbolName, nil];
         [node.details setAttributes:MVUnderlineAttributeName, @"YES", nil];
     }
-    
+
     return node;
 }
 
@@ -1996,58 +1996,58 @@ struct message_ref64 {
     if (parent == nil) {
         return nil;
     }
-    
+
     // check for duplicates
     MVNode *node = [self entryInSectionNode:parent atLocation:location];
     if (node != nil) {
         return node;
     }
-    
+
     MVNodeSaver nodeSaver;
     node = [parent insertChildWithDetails:[@"ObjC2 Class Info: " stringByAppendingString:caption]
                                  location:location
                                    length:sizeof(struct class_ro_t)
                                     saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Flags" col3:@""];
-    
+
     if (class_ro_t->flags & RO_META) [node.details appendRow:@"" col1:@"" col2:@"0x1" col3:@"RO_META"];
     if (class_ro_t->flags & RO_ROOT) [node.details appendRow:@"" col1:@"" col2:@"0x2" col3:@"RO_ROOT"];
     if (class_ro_t->flags & RO_HAS_CXX_STRUCTORS) [node.details appendRow:@"" col1:@"" col2:@"0x4" col3:@"RO_HAS_CXX_STRUCTORS"];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Instance Start" col3:[NSString stringWithFormat:@"%u", class_ro_t->instanceStart]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Instance Size" col3:[NSString stringWithFormat:@"%u", class_ro_t->instanceSize]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Instance Var Layout" col3:[self findSymbolAtRVA:class_ro_t->ivarLayout]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Name" col3:[self findSymbolAtRVA:class_ro_t->name]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Base Methods" col3:[self findSymbolAtRVA:class_ro_t->baseMethods]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Base Protocols" col3:[self findSymbolAtRVA:class_ro_t->baseProtocols]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Instance Variables" col3:[self findSymbolAtRVA:class_ro_t->ivars]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Weak Instance Var Layout" col3:[self findSymbolAtRVA:class_ro_t->weakIvarLayout]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Base Properties" col3:[self findSymbolAtRVA:class_ro_t->baseProperties]];
-    
+
     MVNode *childNode = nil;
-    
+
     // Base Methods
     if (class_ro_t->baseMethods && (childNode = [self sectionNodeContainsRVA:class_ro_t->baseMethods])) {
         uint32_t location = [self RVAToFileOffset:class_ro_t->baseMethods];
@@ -2058,7 +2058,7 @@ struct message_ref64 {
                                location:location
                                 methods:method_list_t];
     }
-    
+
     // Base Protocols
     if (class_ro_t->baseProtocols && (childNode = [self sectionNodeContainsRVA:class_ro_t->baseProtocols])) {
         uint32_t location = [self RVAToFileOffset:class_ro_t->baseProtocols];
@@ -2069,7 +2069,7 @@ struct message_ref64 {
                                  location:location
                                 protocols:protocol_list_t];
     }
-    
+
     // Instance Variables
     if (class_ro_t->ivars && (childNode = [self sectionNodeContainsRVA:class_ro_t->ivars])) {
         uint32_t location = [self RVAToFileOffset:class_ro_t->ivars];
@@ -2080,7 +2080,7 @@ struct message_ref64 {
                                  location:location
                                 variables:ivar_list_t];
     }
-    
+
     // Base Properties
     if (class_ro_t->baseProperties && (childNode = [self sectionNodeContainsRVA:class_ro_t->baseProperties])) {
         uint32_t location = [self RVAToFileOffset:class_ro_t->baseProperties];
@@ -2091,7 +2091,7 @@ struct message_ref64 {
                                  location:location
                                properties:objc_property_list];
     }
-    
+
     return node;
 }
 
@@ -2104,61 +2104,61 @@ struct message_ref64 {
     if (parent == nil) {
         return nil;
     }
-    
+
     // check for duplicates
     MVNode *node = [self entryInSectionNode:parent atLocation:location];
     if (node != nil) {
         return node;
     }
-    
+
     MVNodeSaver nodeSaver;
     node = [parent insertChildWithDetails:[@"ObjC2 Class64 Info: " stringByAppendingString:caption]
                                  location:location
                                    length:sizeof(struct class64_ro_t)
                                     saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Flags" col3:@""];
-    
+
     if (class64_ro_t->flags & RO_META) [node.details appendRow:@"" col1:@"" col2:@"0x1" col3:@"RO_META"];
     if (class64_ro_t->flags & RO_ROOT) [node.details appendRow:@"" col1:@"" col2:@"0x2" col3:@"RO_ROOT"];
     if (class64_ro_t->flags & RO_HAS_CXX_STRUCTORS) [node.details appendRow:@"" col1:@"" col2:@"0x4" col3:@"RO_HAS_CXX_STRUCTORS"];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Instance Start" col3:[NSString stringWithFormat:@"%u", class64_ro_t->instanceStart]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Instance Size" col3:[NSString stringWithFormat:@"%u", class64_ro_t->instanceSize]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Reserved" col3:[NSString stringWithFormat:@"%u", class64_ro_t->reserved]];
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Instance Var Layout" col3:[self findSymbolAtRVA64:class64_ro_t->ivarLayout]];
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Name" col3:[self findSymbolAtRVA64:class64_ro_t->name]];
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Base Methods" col3:[self findSymbolAtRVA64:class64_ro_t->baseMethods]];
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Base Protocols" col3:[self findSymbolAtRVA64:class64_ro_t->baseProtocols]];
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Instance Variables" col3:[self findSymbolAtRVA64:class64_ro_t->ivars]];
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Weak Instance Var Layout" col3:[self findSymbolAtRVA64:class64_ro_t->weakIvarLayout]];
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Base Properties" col3:[self findSymbolAtRVA64:class64_ro_t->baseProperties]];
-    
+
     MVNode *childNode = nil;
-    
+
     // Base Methods
     if (class64_ro_t->baseMethods && (childNode = [self sectionNodeContainsRVA64:class64_ro_t->baseMethods])) {
         uint32_t location = [self RVA64ToFileOffset:class64_ro_t->baseMethods];
@@ -2169,7 +2169,7 @@ struct message_ref64 {
                                  location:location
                                   methods:method64_list_t];
     }
-    
+
     // Base Protocols
     if (class64_ro_t->baseProtocols && (childNode = [self sectionNodeContainsRVA64:class64_ro_t->baseProtocols])) {
         uint32_t location = [self RVA64ToFileOffset:class64_ro_t->baseProtocols];
@@ -2180,7 +2180,7 @@ struct message_ref64 {
                                    location:location
                                   protocols:protocol64_list_t];
     }
-    
+
     // Instance Variables
     if (class64_ro_t->ivars && (childNode = [self sectionNodeContainsRVA64:class64_ro_t->ivars])) {
         uint32_t location = [self RVA64ToFileOffset:class64_ro_t->ivars];
@@ -2191,7 +2191,7 @@ struct message_ref64 {
                                    location:location
                                   variables:ivar64_list_t];
     }
-    
+
     // Base Properties
     if (class64_ro_t->baseProperties && (childNode = [self sectionNodeContainsRVA64:class64_ro_t->baseProperties])) {
         uint32_t location = [self RVA64ToFileOffset:class64_ro_t->baseProperties];
@@ -2202,7 +2202,7 @@ struct message_ref64 {
                                    location:location
                                  properties:objc_property64_list];
     }
-    
+
     return node;
 }
 
@@ -2215,39 +2215,39 @@ struct message_ref64 {
     if (parent == nil) {
         return nil;
     }
-    
+
     // check for duplicates
     MVNode *node = [self entryInSectionNode:parent atLocation:location];
     if (node != nil) {
         return node;
     }
-    
+
     MVNodeSaver nodeSaver;
     node = [parent insertChildWithDetails:[@"ObjC2 Class: " stringByAppendingString:caption]
                                  location:location
                                    length:sizeof(struct class_t)
                                     saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"ISA" col3:[self findSymbolAtRVA:class_t->isa]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Super Class" col3:[self findSymbolAtRVA:class_t->superclass]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Cache" col3:[self findSymbolAtRVA:class_t->cache]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"VTable" col3:[self findSymbolAtRVA:class_t->vtable]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Data" col3:[self findSymbolAtRVA:class_t->data]];
-    
+
     MVNode *childNode = nil;
-    
+
     // readonly data
     if (class_t->data && (childNode = [self sectionNodeContainsRVA:class_t->data])) {
         uint32_t location = [self RVAToFileOffset:class_t->data];
@@ -2258,52 +2258,52 @@ struct message_ref64 {
                             location:location
                              classRO:class_ro_t];
     }
-    
+
     return node;
 }
 
 //------------------------------------------------------------------------------
-- (MVNode *)createObjC2Class64Node : (MVNode *)parent
-                           caption : (NSString *)caption
-                          location : (uint32_t)location
-                             class : (struct class64_t const *)class64_t {
+- (MVNode *)createObjC2Class64Node:(MVNode *)parent
+                           caption:(NSString *)caption
+                          location:(uint32_t)location
+                             class:(struct class64_t const *)class64_t {
     // check for parent
     if (parent == nil) {
         return nil;
     }
-    
+
     // check for duplicates
     MVNode *node = [self entryInSectionNode:parent atLocation:location];
     if (node != nil) {
         return node;
     }
-    
+
     MVNodeSaver nodeSaver;
     node = [parent insertChildWithDetails:[@"ObjC2 Class64: " stringByAppendingString:caption]
                                  location:location
                                    length:sizeof(struct class64_t)
                                     saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"ISA" col3:[self findSymbolAtRVA64:class64_t->isa]];
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Super Class" col3:[self findSymbolAtRVA64:class64_t->superclass]];
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Cache" col3:[self findSymbolAtRVA64:class64_t->cache]];
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"VTable" col3:[self findSymbolAtRVA64:class64_t->vtable]];
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Data" col3:[self findSymbolAtRVA64:class64_t->data]];
-    
+
     MVNode *childNode = nil;
-    
+
     // readonly data
     if (class64_t->data && (childNode = [self sectionNodeContainsRVA64:class64_t->data])) {
         uint32_t location = [self RVA64ToFileOffset:class64_t->data];
@@ -2314,55 +2314,55 @@ struct message_ref64 {
                               location:location
                                classRO:class64_ro_t];
     }
-    
+
     return node;
 }
 
 //------------------------------------------------------------------------------
-- (MVNode *)createObjC2CategoryNode : (MVNode *)parent
-                            caption : (NSString *)caption
-                           location : (uint32_t)location
-                           category : (struct category_t const *)category_t {
+- (MVNode *)createObjC2CategoryNode:(MVNode *)parent
+                            caption:(NSString *)caption
+                           location:(uint32_t)location
+                           category:(struct category_t const *)category_t {
     // check for parent
     if (parent == nil) {
         return nil;
     }
-    
+
     // check for duplicates
     MVNode *node = [self entryInSectionNode:parent atLocation:location];
     if (node != nil) {
         return node;
     }
-    
+
     MVNodeSaver nodeSaver;
     node = [parent insertChildWithDetails:[@"ObjC2 Category: " stringByAppendingString:caption]
                                  location:location
                                    length:sizeof(struct category_t)
                                     saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Name" col3:[self findSymbolAtRVA:category_t->name]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Class" col3:[self findSymbolAtRVA:category_t->cls]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Instance Methods" col3:[self findSymbolAtRVA:category_t->instanceMethods]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Class Methods" col3:[self findSymbolAtRVA:category_t->classMethods]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Protocols" col3:[self findSymbolAtRVA:category_t->protocols]];
-    
+
     [dataController read_uint32:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Instance Properties" col3:[self findSymbolAtRVA:category_t->instanceProperties]];
-    
+
     MVNode *childNode = nil;
-    
+
     // CLS
     if (category_t->cls && (childNode = [self sectionNodeContainsRVA:category_t->cls])) {
         uint32_t location = [self RVAToFileOffset:category_t->cls];
@@ -2373,7 +2373,7 @@ struct message_ref64 {
                           location:location
                              class:class_t];
     }
-    
+
     // Instance Methods
     if (category_t->instanceMethods && (childNode = [self sectionNodeContainsRVA:category_t->instanceMethods])) {
         uint32_t location = [self RVAToFileOffset:category_t->instanceMethods];
@@ -2384,7 +2384,7 @@ struct message_ref64 {
                                location:location
                                 methods:method_list_t];
     }
-    
+
     // Class Methods
     if (category_t->classMethods && (childNode = [self sectionNodeContainsRVA:category_t->classMethods])) {
         uint32_t location = [self RVAToFileOffset:category_t->classMethods];
@@ -2395,7 +2395,7 @@ struct message_ref64 {
                                location:location
                                 methods:method_list_t];
     }
-    
+
     // Protocols
     if (category_t->protocols && (childNode = [self sectionNodeContainsRVA:category_t->protocols])) {
         uint32_t location = [self RVAToFileOffset:category_t->protocols];
@@ -2406,7 +2406,7 @@ struct message_ref64 {
                                  location:location
                                 protocols:protocol_list_t];
     }
-    
+
     // Instance Properties
     if (category_t->instanceProperties && (childNode = [self sectionNodeContainsRVA:category_t->instanceProperties])) {
         uint32_t location = [self RVAToFileOffset:category_t->instanceProperties];
@@ -2417,7 +2417,7 @@ struct message_ref64 {
                                  location:location
                                properties:objc_property_list];
     }
-    
+
     return node;
 }
 
@@ -2430,42 +2430,42 @@ struct message_ref64 {
     if (parent == nil) {
         return nil;
     }
-    
+
     // check for duplicates
     MVNode *node = [self entryInSectionNode:parent atLocation:location];
     if (node != nil) {
         return node;
     }
-    
+
     MVNodeSaver nodeSaver;
     node = [parent insertChildWithDetails:[@"ObjC2 Category64: " stringByAppendingString:caption]
                                  location:location
                                    length:sizeof(struct category64_t)
                                     saver:nodeSaver];
-    
+
     NSRange range = NSMakeRange(location, 0);
     NSString *lastReadHex;
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Name" col3:[self findSymbolAtRVA64:category64_t->name]];
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"CLS" col3:[self findSymbolAtRVA64:category64_t->cls]];
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Instance Methods" col3:[self findSymbolAtRVA64:category64_t->instanceMethods]];
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Class Methods" col3:[self findSymbolAtRVA64:category64_t->classMethods]];
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Protocols" col3:[self findSymbolAtRVA64:category64_t->protocols]];
-    
+
     [dataController read_uint64:range lastReadHex:&lastReadHex];
     [node.details appendRow:[NSString stringWithFormat:@"%.8lX", range.location] col1:lastReadHex col2:@"Instance Properties" col3:[self findSymbolAtRVA64:category64_t->instanceProperties]];
-    
+
     MVNode *childNode = nil;
-    
+
     // CLS
     if (category64_t->cls && (childNode = [self sectionNodeContainsRVA64:category64_t->cls])) {
         uint32_t location = [self RVA64ToFileOffset:category64_t->cls];
@@ -2476,7 +2476,7 @@ struct message_ref64 {
                             location:location
                                class:class64_t];
     }
-    
+
     // Instance Methods
     if (category64_t->instanceMethods && (childNode = [self sectionNodeContainsRVA64:category64_t->instanceMethods])) {
         uint32_t location = [self RVA64ToFileOffset:category64_t->instanceMethods];
@@ -2487,7 +2487,7 @@ struct message_ref64 {
                                  location:location
                                   methods:method64_list_t];
     }
-    
+
     // Class Methods
     if (category64_t->classMethods && (childNode = [self sectionNodeContainsRVA64:category64_t->classMethods])) {
         uint32_t location = [self RVA64ToFileOffset:category64_t->classMethods];
@@ -2498,7 +2498,7 @@ struct message_ref64 {
                                  location:location
                                   methods:method64_list_t];
     }
-    
+
     // Protocols
     if (category64_t->protocols && (childNode = [self sectionNodeContainsRVA64:category64_t->protocols])) {
         uint32_t location = [self RVA64ToFileOffset:category64_t->protocols];
@@ -2509,7 +2509,7 @@ struct message_ref64 {
                                    location:location
                                   protocols:protocol64_list_t];
     }
-    
+
     // Instance Properties
     if (category64_t->instanceProperties && (childNode = [self sectionNodeContainsRVA64:category64_t->instanceProperties])) {
         uint32_t location = [self RVA64ToFileOffset:category64_t->instanceProperties];
@@ -2520,7 +2520,7 @@ struct message_ref64 {
                                    location:location
                                  properties:objc_property64_list];
     }
-    
+
     return node;
 }
 
@@ -2529,7 +2529,7 @@ struct message_ref64 {
                CategoryPointers:(PointerVector const *)categories
                ProtocolPointers:(PointerVector const *)protocols {
     MVNode *node = nil;
-    
+
     for (PointerVector::const_iterator iter = classes->begin(); iter != classes->end(); ++iter) {
         uint32_t const &rva = *iter;
         if (rva && (node = [self sectionNodeContainsRVA:rva])) {
@@ -2542,7 +2542,7 @@ struct message_ref64 {
                                  class:class_t];
         }
     }
-    
+
     for (PointerVector::const_iterator iter = categories->begin(); iter != categories->end(); ++iter) {
         uint32_t const &rva = *iter;
         if (rva && (node = [self sectionNodeContainsRVA:rva])) {
@@ -2555,7 +2555,7 @@ struct message_ref64 {
                                  category:category_t];
         }
     }
-    
+
     for (PointerVector::const_iterator iter = protocols->begin(); iter != protocols->end(); ++iter) {
         uint32_t const &rva = *iter;
         if (rva && (node = [self sectionNodeContainsRVA:rva])) {
@@ -2575,7 +2575,7 @@ struct message_ref64 {
                Category64Pointers:(Pointer64Vector const *)categories
                Protocol64Pointers:(Pointer64Vector const *)protocols {
     MVNode *node = nil;
-    
+
     for (Pointer64Vector::const_iterator iter = classes->begin(); iter != classes->end(); ++iter) {
         uint64_t const &rva64 = *iter;
         if (rva64 && (node = [self sectionNodeContainsRVA64:rva64])) {
@@ -2588,7 +2588,7 @@ struct message_ref64 {
                                    class:class64_t];
         }
     }
-    
+
     for (Pointer64Vector::const_iterator iter = categories->begin(); iter != categories->end(); ++iter) {
         uint64_t const &rva64 = *iter;
         if (rva64 && (node = [self sectionNodeContainsRVA64:rva64])) {
@@ -2601,7 +2601,7 @@ struct message_ref64 {
                                    category:category64_t];
         }
     }
-    
+
     for (Pointer64Vector::const_iterator iter = protocols->begin(); iter != protocols->end(); ++iter) {
         uint64_t const &rva64 = *iter;
         if (rva64 && (node = [self sectionNodeContainsRVA64:rva64])) {
