@@ -62,6 +62,7 @@
 		8D11072D0486CEB800E47090 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.mm */; settings = {ATTRIBUTES = (); }; };
 		D67023BC229D42E6009F8A52 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D67023BB229D42E6009F8A52 /* AppKit.framework */; };
 		D67023BE229D42EC009F8A52 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D67023BD229D42EC009F8A52 /* Cocoa.framework */; };
+		D6C37C00229E7713002B69DD /* createdmg in Resources */ = {isa = PBXBuildFile; fileRef = 3C30845A11FDAF6F008A270F /* createdmg */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -208,6 +209,7 @@
 		7B7828BF1A1E017B00AE03DB /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
 		D67023BB229D42E6009F8A52 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		D67023BD229D42EC009F8A52 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		D6C37BFF229E76CD002B69DD /* reloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = reloc.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -226,45 +228,45 @@
 		080E96DDFE201D6D7F000001 /* machoview */ = {
 			isa = PBXGroup;
 			children = (
-				3C871CB1141AC7C100288512 /* Common.h */,
 				256AC3D80F4B6AC300CF3369 /* AppController.h */,
 				256AC3D90F4B6AC300CF3369 /* AppController.mm */,
-				3C46C7D71687C5CB00212190 /* PreferenceController.h */,
-				3C46C7D81687C6ED00212190 /* PreferenceController.mm */,
-				3C73525811DE122900DF1950 /* Document.h */,
-				3C73525911DE122900DF1950 /* Document.mm */,
-				3CF978C411C7B34C004CD74C /* DataSources.h */,
-				3CF978C511C7B34C004CD74C /* DataSources.mm */,
-				3CF9779C11C77A23004CD74C /* DataController.h */,
-				3CF9779D11C77A23004CD74C /* DataController.mm */,
-				3CE7199D1333A4EF0005C4DA /* Layout.h */,
-				3CE7199E1333A4EF0005C4DA /* Layout.mm */,
-				3C34A82914892FF1005B53F6 /* FatLayout.h */,
-				3C34A82A14892FF1005B53F6 /* FatLayout.mm */,
 				3CE718B513338F030005C4DA /* ArchiveLayout.h */,
 				3CE718B613338F0E0005C4DA /* ArchiveLayout.mm */,
-				3CF97F0D11C91F93004CD74C /* MachOLayout.h */,
-				3CF97F0E11C91F93004CD74C /* MachOLayout.mm */,
-				3CE90D8611F6012C00543402 /* LoadCommands.h */,
-				3CE90D8711F6017B00543402 /* LoadCommands.mm */,
-				3CE90DB411F60B2E00543402 /* LinkEdit.h */,
-				3CE90DB511F60B6900543402 /* LinkEdit.mm */,
-				3CD037C01248F66300DCFC68 /* DyldInfo.h */,
-				3CD037C11248F66C00DCFC68 /* DyldInfo.mm */,
-				3C61A87D1240B0C100BDF3D0 /* SectionContents.h */,
-				3C61A87B1240B0B400BDF3D0 /* SectionContents.mm */,
-				3CE90DED11F60D4F00543402 /* Exceptions.h */,
-				3CE90DEE11F60D5A00543402 /* Exceptions.mm */,
-				3CF22E90144C8FC600380071 /* ObjC.h */,
-				3CF22E91144C8FC600380071 /* ObjC.mm */,
-				3CE90D7F11F6002B00543402 /* ReadWrite.h */,
-				3CE90D1711F5F82200543402 /* ReadWrite.mm */,
-				3CCC228B129EE70C0083DAE2 /* CRTFootPrints.h */,
-				3CCC228C129EE70C0083DAE2 /* CRTFootPrints.mm */,
 				7B111E4817DC3401008ED484 /* Attach.h */,
 				7B111E4617DC33F8008ED484 /* Attach.mm */,
+				3CCC228B129EE70C0083DAE2 /* CRTFootPrints.h */,
+				3CCC228C129EE70C0083DAE2 /* CRTFootPrints.mm */,
+				3C871CB1141AC7C100288512 /* Common.h */,
+				3CF9779C11C77A23004CD74C /* DataController.h */,
+				3CF9779D11C77A23004CD74C /* DataController.mm */,
+				3CF978C411C7B34C004CD74C /* DataSources.h */,
+				3CF978C511C7B34C004CD74C /* DataSources.mm */,
+				3C73525811DE122900DF1950 /* Document.h */,
+				3C73525911DE122900DF1950 /* Document.mm */,
+				3CD037C01248F66300DCFC68 /* DyldInfo.h */,
+				3CD037C11248F66C00DCFC68 /* DyldInfo.mm */,
+				3CE90DED11F60D4F00543402 /* Exceptions.h */,
+				3CE90DEE11F60D5A00543402 /* Exceptions.mm */,
+				3C34A82914892FF1005B53F6 /* FatLayout.h */,
+				3C34A82A14892FF1005B53F6 /* FatLayout.mm */,
+				3CE7199D1333A4EF0005C4DA /* Layout.h */,
+				3CE7199E1333A4EF0005C4DA /* Layout.mm */,
+				3CE90DB411F60B2E00543402 /* LinkEdit.h */,
+				3CE90DB511F60B6900543402 /* LinkEdit.mm */,
+				3CE90D8611F6012C00543402 /* LoadCommands.h */,
+				3CE90D8711F6017B00543402 /* LoadCommands.mm */,
+				3CF97F0D11C91F93004CD74C /* MachOLayout.h */,
+				3CF97F0E11C91F93004CD74C /* MachOLayout.mm */,
+				3CF22E90144C8FC600380071 /* ObjC.h */,
+				3CF22E91144C8FC600380071 /* ObjC.mm */,
+				3C46C7D71687C5CB00212190 /* PreferenceController.h */,
+				3C46C7D81687C6ED00212190 /* PreferenceController.mm */,
+				3CE90D7F11F6002B00543402 /* ReadWrite.h */,
+				3CE90D1711F5F82200543402 /* ReadWrite.mm */,
+				3C61A87D1240B0C100BDF3D0 /* SectionContents.h */,
+				3C61A87B1240B0B400BDF3D0 /* SectionContents.mm */,
 			);
-			name = machoview;
+			path = machoview;
 			sourceTree = "<group>";
 		};
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
@@ -281,8 +283,8 @@
 				3CE90DFC11F6107600543402 /* README */,
 				3C30845A11FDAF6F008A270F /* createdmg */,
 				7B5E71DF19B6829F00843CCE /* capstone */,
-				080E96DDFE201D6D7F000001 /* machoview */,
 				3C78CB26139EE44B006C9591 /* mach-o */,
+				080E96DDFE201D6D7F000001 /* machoview */,
 				29B97315FDCFA39411CA2CEA /* main */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
@@ -297,7 +299,7 @@
 				256AC3F00F4B6AF500CF3369 /* Prefix.pch */,
 				29B97316FDCFA39411CA2CEA /* main.mm */,
 			);
-			name = main;
+			path = main;
 			sourceTree = "<group>";
 		};
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
@@ -305,15 +307,15 @@
 			children = (
 				3C46C8491687DEE600212190 /* Credits.rtf */,
 				3CCB9FDF11F6DC2000F57CAA /* Info.plist */,
-				3C0F958811F658BF0070A2FE /* redApple.icns */,
-				3C0F958711F658BF0070A2FE /* greenApple.icns */,
-				3C1163F013D5B88D007B4A6E /* stop.png */,
 				3C0F957E11F6589D0070A2FE /* InfoPlist.strings */,
-				3C0F958211F6589D0070A2FE /* MainMenu.xib */,
 				3C0F958011F6589D0070A2FE /* Layout.xib */,
+				3C0F958211F6589D0070A2FE /* MainMenu.xib */,
 				3C3EC88D13B66E8900ECCDB2 /* Preferences.xib */,
+				3C0F958711F658BF0070A2FE /* greenApple.icns */,
+				3C0F958811F658BF0070A2FE /* redApple.icns */,
+				3C1163F013D5B88D007B4A6E /* stop.png */,
 			);
-			name = Resources;
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
@@ -329,8 +331,10 @@
 		3C78CB26139EE44B006C9591 /* mach-o */ = {
 			isa = PBXGroup;
 			children = (
-				3CDFB35D139F603C00F46F18 /* arch.h */,
 				3CDFB35E139F603C00F46F18 /* arm */,
+				D6C37BFE229E76CD002B69DD /* arm64 */,
+				3CDFB367139F603C00F46F18 /* x86_64 */,
+				3CDFB35D139F603C00F46F18 /* arch.h */,
 				3CDFB360139F603C00F46F18 /* compact_unwind_encoding.h */,
 				3CDFB361139F603C00F46F18 /* fat.h */,
 				3CDFB362139F603C00F46F18 /* loader.h */,
@@ -338,7 +342,6 @@
 				3CDFB364139F603C00F46F18 /* ranlib.h */,
 				3CDFB365139F603C00F46F18 /* reloc.h */,
 				3CDFB366139F603C00F46F18 /* swap.h */,
-				3CDFB367139F603C00F46F18 /* x86_64 */,
 			);
 			path = "mach-o";
 			sourceTree = "<group>";
@@ -363,12 +366,8 @@
 			isa = PBXGroup;
 			children = (
 				7B7828601A1E017B00AE03DB /* arch */,
-				7B7828A41A1E017B00AE03DB /* cs_priv.h */,
-				7B7828A51A1E017B00AE03DB /* cs.c */,
 				7B7828A61A1E017B00AE03DB /* include */,
-				7B7828B11A1E017B00AE03DB /* inttypes.h */,
 				7B7828B21A1E017B00AE03DB /* LEB128.h */,
-				7B7828B31A1E017B00AE03DB /* MathExtras.h */,
 				7B7828B41A1E017B00AE03DB /* MCDisassembler.h */,
 				7B7828B51A1E017B00AE03DB /* MCFixedLenDisassembler.h */,
 				7B7828B61A1E017B00AE03DB /* MCInst.c */,
@@ -377,8 +376,12 @@
 				7B7828B91A1E017B00AE03DB /* MCInstrDesc.h */,
 				7B7828BA1A1E017B00AE03DB /* MCRegisterInfo.c */,
 				7B7828BB1A1E017B00AE03DB /* MCRegisterInfo.h */,
+				7B7828B31A1E017B00AE03DB /* MathExtras.h */,
 				7B7828BC1A1E017B00AE03DB /* SStream.c */,
 				7B7828BD1A1E017B00AE03DB /* SStream.h */,
+				7B7828A51A1E017B00AE03DB /* cs.c */,
+				7B7828A41A1E017B00AE03DB /* cs_priv.h */,
+				7B7828B11A1E017B00AE03DB /* inttypes.h */,
 				7B7828BE1A1E017B00AE03DB /* utils.c */,
 				7B7828BF1A1E017B00AE03DB /* utils.h */,
 			);
@@ -480,6 +483,14 @@
 			path = include;
 			sourceTree = "<group>";
 		};
+		D6C37BFE229E76CD002B69DD /* arm64 */ = {
+			isa = PBXGroup;
+			children = (
+				D6C37BFF229E76CD002B69DD /* reloc.h */,
+			);
+			path = arm64;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -523,6 +534,7 @@
 				German,
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* Mach-O Browser */;
+			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -536,6 +548,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6C37C00229E7713002B69DD /* createdmg in Resources */,
 				3C0F958411F6589D0070A2FE /* InfoPlist.strings in Resources */,
 				3C0F958511F6589D0070A2FE /* Layout.xib in Resources */,
 				3C0F958611F6589D0070A2FE /* MainMenu.xib in Resources */,
@@ -562,7 +575,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#!/bin/bash\n# Auto Increment Version Script\nbuildPlist=\"Info.plist\"\nCFBundleShortVersionString=$(/usr/libexec/PlistBuddy -c \"Print CFBundleShortVersionString\" $buildPlist)\nCFBuildNumber=$(/usr/libexec/PlistBuddy -c \"Print CFBuildNumber\" $buildPlist)\nCFBuildNumber=$(($CFBuildNumber + 1))\n/usr/libexec/PlistBuddy -c \"Set :CFBuildNumber $CFBuildNumber\" $buildPlist\nCFBuildDate=$(date)\n/usr/libexec/PlistBuddy -c \"Set :CFBuildDate $CFBuildDate\" $buildPlist\n# set Bundle version\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $CFBuildNumber\" $buildPlist\necho \"New build: $CFBundleShortVersionString (build: $CFBuildNumber) $CFBuildDate\"";
+			shellScript = "#!/bin/bash\n# Auto Increment Version Script\nbuildPlist=\"Resources/Info.plist\"\nCFBundleShortVersionString=$(/usr/libexec/PlistBuddy -c \"Print CFBundleShortVersionString\" $buildPlist)\nCFBuildNumber=$(/usr/libexec/PlistBuddy -c \"Print CFBuildNumber\" $buildPlist)\nCFBuildNumber=$(($CFBuildNumber + 1))\n/usr/libexec/PlistBuddy -c \"Set :CFBuildNumber $CFBuildNumber\" $buildPlist\nCFBuildDate=$(date)\n/usr/libexec/PlistBuddy -c \"Set :CFBuildDate $CFBuildDate\" $buildPlist\n# set Bundle version\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $CFBuildNumber\" $buildPlist\necho \"New build: $CFBundleShortVersionString (build: $CFBuildNumber) $CFBuildDate\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -627,6 +640,7 @@
 				3C0F957F11F6589D0070A2FE /* English */,
 			);
 			name = InfoPlist.strings;
+			path = .;
 			sourceTree = "<group>";
 		};
 		3C0F958011F6589D0070A2FE /* Layout.xib */ = {
@@ -635,6 +649,7 @@
 				3C0F958111F6589D0070A2FE /* English */,
 			);
 			name = Layout.xib;
+			path = .;
 			sourceTree = "<group>";
 		};
 		3C0F958211F6589D0070A2FE /* MainMenu.xib */ = {
@@ -643,6 +658,7 @@
 				3C0F958311F6589D0070A2FE /* English */,
 			);
 			name = MainMenu.xib;
+			path = .;
 			sourceTree = "<group>";
 		};
 		3C3EC88D13B66E8900ECCDB2 /* Preferences.xib */ = {
@@ -651,6 +667,7 @@
 				3C3EC88E13B66E8900ECCDB2 /* English */,
 			);
 			name = Preferences.xib;
+			path = .;
 			sourceTree = "<group>";
 		};
 		3C46C8491687DEE600212190 /* Credits.rtf */ = {
@@ -659,6 +676,7 @@
 				3C46C84A1687DEE600212190 /* English */,
 			);
 			name = Credits.rtf;
+			path = .;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -679,7 +697,7 @@
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = Prefix.pch;
+				GCC_PREFIX_HEADER = main/Prefix.pch;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GENERATE_PROFILING_CODE = NO;
@@ -688,7 +706,7 @@
 					"$(SRCROOT)/capstone/include",
 				);
 				INCLUDED_RECURSIVE_SEARCH_PATH_SUBDIRECTORIES = "";
-				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_FILE = Resources/Info.plist;
 				INSTALL_PATH = /Applications;
 				LIBRARY_SEARCH_PATHS = "$(SRCROOT)";
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
@@ -706,7 +724,7 @@
 					"-sectcreate",
 					__TEXT,
 					__info_plist,
-					Info.plist,
+					Resources/Info.plist,
 				);
 				PRIVATE_HEADERS_FOLDER_PATH = "";
 				PRODUCT_NAME = MachOView;
@@ -732,7 +750,7 @@
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_OPTIMIZATION_LEVEL = s;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = Prefix.pch;
+				GCC_PREFIX_HEADER = main/Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = NS_BLOCK_ASSERTIONS;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -744,7 +762,7 @@
 					"$(SRCROOT)/capstone/include",
 				);
 				INCLUDED_RECURSIVE_SEARCH_PATH_SUBDIRECTORIES = "";
-				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_FILE = Resources/Info.plist;
 				INSTALL_PATH = /Applications;
 				LIBRARY_SEARCH_PATHS = "$(SRCROOT)";
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
@@ -762,7 +780,7 @@
 					"-sectcreate",
 					__TEXT,
 					__info_plist,
-					Info.plist,
+					Resources/Info.plist,
 				);
 				PRIVATE_HEADERS_FOLDER_PATH = "";
 				PRODUCT_NAME = MachOView;
